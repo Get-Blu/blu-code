@@ -11,6 +11,10 @@ const (
 	Claude3Opus    ModelID = "claude-3-opus"
 	Claude4Opus    ModelID = "claude-4-opus"
 	Claude4Sonnet  ModelID = "claude-4-sonnet"
+	Claude46Opus   ModelID = "claude-4.6-opus"
+	Claude46Sonnet ModelID = "claude-4.6-sonnet"
+	Claude5Opus    ModelID = "claude-5-opus"
+	Claude5Sonnet  ModelID = "claude-5-sonnet"
 )
 
 // https://docs.anthropic.com/en/docs/about-claude/models/all-models
@@ -106,6 +110,62 @@ var AnthropicModels = map[ModelID]Model{
 		CostPer1MOut:        75.0,
 		ContextWindow:       200000,
 		DefaultMaxTokens:    4096,
+		SupportsAttachments: true,
+	},
+	Claude46Opus: {
+		ID:                  Claude46Opus,
+		Name:                "Claude 4.6 Opus",
+		Provider:            ProviderAnthropic,
+		APIModel:            "claude-4-6-opus-latest",
+		CostPer1MIn:         15.0,
+		CostPer1MInCached:   18.75,
+		CostPer1MOutCached:  1.50,
+		CostPer1MOut:        75.0,
+		ContextWindow:       400000,
+		DefaultMaxTokens:    8192,
+		CanReason:           true,
+		SupportsAttachments: true,
+	},
+	Claude46Sonnet: {
+		ID:                  Claude46Sonnet,
+		Name:                "Claude 4.6 Sonnet",
+		Provider:            ProviderAnthropic,
+		APIModel:            "claude-4-6-sonnet-latest",
+		CostPer1MIn:         3.0,
+		CostPer1MInCached:   3.75,
+		CostPer1MOutCached:  0.30,
+		CostPer1MOut:        15.0,
+		ContextWindow:       400000,
+		DefaultMaxTokens:    8192,
+		CanReason:           true,
+		SupportsAttachments: true,
+	},
+	Claude5Opus: {
+		ID:                  Claude5Opus,
+		Name:                "Claude 5 Opus",
+		Provider:            ProviderAnthropic,
+		APIModel:            "claude-5-opus-latest",
+		CostPer1MIn:         10.0,
+		CostPer1MInCached:   12.50,
+		CostPer1MOutCached:  1.00,
+		CostPer1MOut:        50.0,
+		ContextWindow:       1000000,
+		DefaultMaxTokens:    8192,
+		CanReason:           true,
+		SupportsAttachments: true,
+	},
+	Claude5Sonnet: {
+		ID:                  Claude5Sonnet,
+		Name:                "Claude 5 Sonnet",
+		Provider:            ProviderAnthropic,
+		APIModel:            "claude-5-sonnet-latest",
+		CostPer1MIn:         2.0,
+		CostPer1MInCached:   2.5,
+		CostPer1MOutCached:  0.2,
+		CostPer1MOut:        10.0,
+		ContextWindow:       1000000,
+		DefaultMaxTokens:    8192,
+		CanReason:           true,
 		SupportsAttachments: true,
 	},
 }

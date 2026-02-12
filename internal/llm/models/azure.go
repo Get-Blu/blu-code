@@ -7,6 +7,8 @@ const (
 	AzureGPT41Mini    ModelID = "azure.gpt-4.1-mini"
 	AzureGPT41Nano    ModelID = "azure.gpt-4.1-nano"
 	AzureGPT45Preview ModelID = "azure.gpt-4.5-preview"
+	AzureGPT46        ModelID = "azure.gpt-4.6"
+	AzureGPT5         ModelID = "azure.gpt-5"
 	AzureGPT4o        ModelID = "azure.gpt-4o"
 	AzureGPT4oMini    ModelID = "azure.gpt-4o-mini"
 	AzureO1           ModelID = "azure.o1"
@@ -163,6 +165,33 @@ var AzureModels = map[ModelID]Model{
 		ContextWindow:       OpenAIModels[O4Mini].ContextWindow,
 		DefaultMaxTokens:    OpenAIModels[O4Mini].DefaultMaxTokens,
 		CanReason:           OpenAIModels[O4Mini].CanReason,
+		SupportsAttachments: true,
+	},
+	AzureGPT46: {
+		ID:                  AzureGPT46,
+		Name:                "Azure OpenAI – GPT 4.6",
+		Provider:            ProviderAzure,
+		APIModel:            "gpt-4.6",
+		CostPer1MIn:         OpenAIModels[GPT46].CostPer1MIn,
+		CostPer1MInCached:   OpenAIModels[GPT46].CostPer1MInCached,
+		CostPer1MOut:        OpenAIModels[GPT46].CostPer1MOut,
+		CostPer1MOutCached:  OpenAIModels[GPT46].CostPer1MOutCached,
+		ContextWindow:       OpenAIModels[GPT46].ContextWindow,
+		DefaultMaxTokens:    OpenAIModels[GPT46].DefaultMaxTokens,
+		SupportsAttachments: true,
+	},
+	AzureGPT5: {
+		ID:                  AzureGPT5,
+		Name:                "Azure OpenAI – GPT 5",
+		Provider:            ProviderAzure,
+		APIModel:            "gpt-5",
+		CostPer1MIn:         OpenAIModels[GPT5].CostPer1MIn,
+		CostPer1MInCached:   OpenAIModels[GPT5].CostPer1MInCached,
+		CostPer1MOut:        OpenAIModels[GPT5].CostPer1MOut,
+		CostPer1MOutCached:  OpenAIModels[GPT5].CostPer1MOutCached,
+		ContextWindow:       OpenAIModels[GPT5].ContextWindow,
+		DefaultMaxTokens:    OpenAIModels[GPT5].DefaultMaxTokens,
+		CanReason:           OpenAIModels[GPT5].CanReason,
 		SupportsAttachments: true,
 	},
 }

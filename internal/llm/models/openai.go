@@ -7,6 +7,11 @@ const (
 	GPT41Mini    ModelID = "gpt-4.1-mini"
 	GPT41Nano    ModelID = "gpt-4.1-nano"
 	GPT45Preview ModelID = "gpt-4.5-preview"
+	GPT46        ModelID = "gpt-4.6"
+	GPT46Mini    ModelID = "gpt-4.6-mini"
+	GPT5         ModelID = "gpt-5"
+	GPT5Mini     ModelID = "gpt-5-mini"
+	GPT5Turbo    ModelID = "gpt-5-turbo"
 	GPT4o        ModelID = "gpt-4o"
 	GPT4oMini    ModelID = "gpt-4o-mini"
 	O1           ModelID = "o1"
@@ -14,6 +19,7 @@ const (
 	O1Mini       ModelID = "o1-mini"
 	O3           ModelID = "o3"
 	O3Mini       ModelID = "o3-mini"
+	O3Ultra      ModelID = "o3-ultra"
 	O4Mini       ModelID = "o4-mini"
 )
 
@@ -175,6 +181,60 @@ var OpenAIModels = map[ModelID]Model{
 		CostPer1MOut:        4.40,
 		ContextWindow:       128_000,
 		DefaultMaxTokens:    50000,
+		CanReason:           true,
+		SupportsAttachments: true,
+	},
+	GPT46: {
+		ID:                  GPT46,
+		Name:                "GPT 4.6",
+		Provider:            ProviderOpenAI,
+		APIModel:            "gpt-4.6",
+		CostPer1MIn:         2.00,
+		CostPer1MInCached:   0.50,
+		CostPer1MOutCached:  0.0,
+		CostPer1MOut:        8.00,
+		ContextWindow:       2_000_000,
+		DefaultMaxTokens:    128000,
+		SupportsAttachments: true,
+	},
+	GPT5: {
+		ID:                  GPT5,
+		Name:                "GPT 5",
+		Provider:            ProviderOpenAI,
+		APIModel:            "gpt-5",
+		CostPer1MIn:         10.00,
+		CostPer1MInCached:   5.00,
+		CostPer1MOutCached:  0.0,
+		CostPer1MOut:        30.00,
+		ContextWindow:       2_000_000,
+		DefaultMaxTokens:    128000,
+		CanReason:           true,
+		SupportsAttachments: true,
+	},
+	GPT5Turbo: {
+		ID:                  GPT5Turbo,
+		Name:                "GPT 5 Turbo",
+		Provider:            ProviderOpenAI,
+		APIModel:            "gpt-5-turbo",
+		CostPer1MIn:         2.00,
+		CostPer1MInCached:   1.00,
+		CostPer1MOutCached:  0.0,
+		CostPer1MOut:        8.00,
+		ContextWindow:       1_000_000,
+		DefaultMaxTokens:    128000,
+		CanReason:           true,
+		SupportsAttachments: true,
+	},
+	O3Ultra: {
+		ID:                  O3Ultra,
+		Name:                "o3 ultra",
+		Provider:            ProviderOpenAI,
+		APIModel:            "o3-ultra",
+		CostPer1MIn:         15.00,
+		CostPer1MInCached:   7.50,
+		CostPer1MOutCached:  0.0,
+		CostPer1MOut:        60.00,
+		ContextWindow:       200_000,
 		CanReason:           true,
 		SupportsAttachments: true,
 	},

@@ -15,6 +15,11 @@ const (
 	OpenRouterO3             ModelID = "openrouter.o3"
 	OpenRouterO3Mini         ModelID = "openrouter.o3-mini"
 	OpenRouterO4Mini         ModelID = "openrouter.o4-mini"
+	OpenRouterGPT5           ModelID = "openrouter.gpt-5"
+	OpenRouterClaude46Opus   ModelID = "openrouter.claude-4.6-opus"
+	OpenRouterClaude5Opus    ModelID = "openrouter.claude-5-opus"
+	OpenRouterGemini30Flash  ModelID = "openrouter.gemini-3.0-flash"
+	OpenRouterGemini30Pro    ModelID = "openrouter.gemini-3.0-pro"
 	OpenRouterGemini25Flash  ModelID = "openrouter.gemini-2.5-flash"
 	OpenRouterGemini25       ModelID = "openrouter.gemini-2.5"
 	OpenRouterClaude35Sonnet ModelID = "openrouter.claude-3.5-sonnet"
@@ -174,6 +179,69 @@ var OpenRouterModels = map[ModelID]Model{
 		ContextWindow:      OpenAIModels[O4Mini].ContextWindow,
 		DefaultMaxTokens:   OpenAIModels[O4Mini].DefaultMaxTokens,
 		CanReason:          OpenAIModels[O4Mini].CanReason,
+	},
+	OpenRouterGPT5: {
+		ID:                 OpenRouterGPT5,
+		Name:               "OpenRouter – GPT 5",
+		Provider:           ProviderOpenRouter,
+		APIModel:           "openai/gpt-5",
+		CostPer1MIn:        OpenAIModels[GPT5].CostPer1MIn,
+		CostPer1MInCached:  OpenAIModels[GPT5].CostPer1MInCached,
+		CostPer1MOut:       OpenAIModels[GPT5].CostPer1MOut,
+		CostPer1MOutCached: OpenAIModels[GPT5].CostPer1MOutCached,
+		ContextWindow:      OpenAIModels[GPT5].ContextWindow,
+		DefaultMaxTokens:   OpenAIModels[GPT5].DefaultMaxTokens,
+		CanReason:          OpenAIModels[GPT5].CanReason,
+	},
+	OpenRouterClaude46Opus: {
+		ID:                 OpenRouterClaude46Opus,
+		Name:               "OpenRouter – Claude 4.6 Opus",
+		Provider:           ProviderOpenRouter,
+		APIModel:           "anthropic/claude-4.6-opus",
+		CostPer1MIn:        AnthropicModels[Claude46Opus].CostPer1MIn,
+		CostPer1MInCached:  AnthropicModels[Claude46Opus].CostPer1MInCached,
+		CostPer1MOut:       AnthropicModels[Claude46Opus].CostPer1MOut,
+		CostPer1MOutCached: AnthropicModels[Claude46Opus].CostPer1MOutCached,
+		ContextWindow:      AnthropicModels[Claude46Opus].ContextWindow,
+		DefaultMaxTokens:   AnthropicModels[Claude46Opus].DefaultMaxTokens,
+		CanReason:          AnthropicModels[Claude46Opus].CanReason,
+	},
+	OpenRouterClaude5Opus: {
+		ID:                 OpenRouterClaude5Opus,
+		Name:               "OpenRouter – Claude 5 Opus",
+		Provider:           ProviderOpenRouter,
+		APIModel:           "anthropic/claude-5-opus",
+		CostPer1MIn:        AnthropicModels[Claude5Opus].CostPer1MIn,
+		CostPer1MInCached:  AnthropicModels[Claude5Opus].CostPer1MInCached,
+		CostPer1MOut:       AnthropicModels[Claude5Opus].CostPer1MOut,
+		CostPer1MOutCached: AnthropicModels[Claude5Opus].CostPer1MOutCached,
+		ContextWindow:      AnthropicModels[Claude5Opus].ContextWindow,
+		DefaultMaxTokens:   AnthropicModels[Claude5Opus].DefaultMaxTokens,
+		CanReason:          AnthropicModels[Claude5Opus].CanReason,
+	},
+	OpenRouterGemini30Flash: {
+		ID:                 OpenRouterGemini30Flash,
+		Name:               "OpenRouter – Gemini 3.0 Flash",
+		Provider:           ProviderOpenRouter,
+		APIModel:           "google/gemini-3.0-flash",
+		CostPer1MIn:        GeminiModels[Gemini30Flash].CostPer1MIn,
+		CostPer1MInCached:  GeminiModels[Gemini30Flash].CostPer1MInCached,
+		CostPer1MOut:       GeminiModels[Gemini30Flash].CostPer1MOut,
+		CostPer1MOutCached: GeminiModels[Gemini30Flash].CostPer1MOutCached,
+		ContextWindow:      GeminiModels[Gemini30Flash].ContextWindow,
+		DefaultMaxTokens:   GeminiModels[Gemini30Flash].DefaultMaxTokens,
+	},
+	OpenRouterGemini30Pro: {
+		ID:                 OpenRouterGemini30Pro,
+		Name:               "OpenRouter – Gemini 3.0 Pro",
+		Provider:           ProviderOpenRouter,
+		APIModel:           "google/gemini-3.0-pro",
+		CostPer1MIn:        GeminiModels[Gemini30Pro].CostPer1MIn,
+		CostPer1MInCached:  GeminiModels[Gemini30Pro].CostPer1MInCached,
+		CostPer1MOut:       GeminiModels[Gemini30Pro].CostPer1MOut,
+		CostPer1MOutCached: GeminiModels[Gemini30Pro].CostPer1MOutCached,
+		ContextWindow:      GeminiModels[Gemini30Pro].ContextWindow,
+		DefaultMaxTokens:   GeminiModels[Gemini30Pro].DefaultMaxTokens,
 	},
 	OpenRouterGemini25Flash: {
 		ID:                 OpenRouterGemini25Flash,

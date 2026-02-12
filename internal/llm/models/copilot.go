@@ -8,9 +8,11 @@ const (
 	CopilotGPT4o           ModelID = "copilot.gpt-4o"
 	CopilotGPT4oMini       ModelID = "copilot.gpt-4o-mini"
 	CopilotGPT41           ModelID = "copilot.gpt-4.1"
+	CopilotGPT5            ModelID = "copilot.gpt-5"
 	CopilotClaude35        ModelID = "copilot.claude-3.5-sonnet"
 	CopilotClaude37        ModelID = "copilot.claude-3.7-sonnet"
 	CopilotClaude4         ModelID = "copilot.claude-sonnet-4"
+	CopilotClaude46        ModelID = "copilot.claude-sonnet-4.6"
 	CopilotO1              ModelID = "copilot.o1"
 	CopilotO3Mini          ModelID = "copilot.o3-mini"
 	CopilotO4Mini          ModelID = "copilot.o4-mini"
@@ -213,6 +215,34 @@ var CopilotModels = map[ModelID]Model{
 		CostPer1MOut:        0.0,
 		ContextWindow:       200_000,
 		DefaultMaxTokens:    16384,
+		CanReason:           true,
+		SupportsAttachments: true,
+	},
+	CopilotGPT5: {
+		ID:                  CopilotGPT5,
+		Name:                "GitHub Copilot GPT-5",
+		Provider:            ProviderCopilot,
+		APIModel:            "gpt-5",
+		CostPer1MIn:         0.0,
+		CostPer1MInCached:   0.0,
+		CostPer1MOutCached:  0.0,
+		CostPer1MOut:        0.0,
+		ContextWindow:       1_000_000,
+		DefaultMaxTokens:    128_000,
+		CanReason:           true,
+		SupportsAttachments: true,
+	},
+	CopilotClaude46: {
+		ID:                  CopilotClaude46,
+		Name:                "GitHub Copilot Claude 4.6 Sonnet",
+		Provider:            ProviderCopilot,
+		APIModel:            "claude-4.6-sonnet",
+		CostPer1MIn:         0.0,
+		CostPer1MInCached:   0.0,
+		CostPer1MOutCached:  0.0,
+		CostPer1MOut:        0.0,
+		ContextWindow:       200_000,
+		DefaultMaxTokens:    16_384,
 		CanReason:           true,
 		SupportsAttachments: true,
 	},

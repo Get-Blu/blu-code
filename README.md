@@ -1,8 +1,4 @@
-# 🌀 Blu
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/9ae61ef6-70e5-4876-bc45-5bcb4e52c714" width="800" alt="Blu Banner">
-</p>
+# Blu
 
 <p align="center">
   <strong>The next-generation terminal-based AI assistant for software engineers.</strong>
@@ -17,28 +13,28 @@
 
 ---
 
-## 🌊 What is Blu?
+## What is Blu?
 
 **Blu** is a high-performance, Go-powered terminal assistant designed to bridge the gap between your local environment and powerful AI models. It provides a fluid, interactive TUI that allows you to chat with AI, let it analyze your codebase, and execute complex developer workflows without ever leaving your terminal.
 
 > [!IMPORTANT]
-> **Built with ❤️ on top of [OpenCode](https://github.com/opencode-ai/opencode).**  
+> **Built with on top of [OpenCode](https://github.com/opencode-ai/opencode).**  
 > Blu is a specialized distribution and evolution of the original OpenCode repository, optimized for a premium user experience and unique developer features.
 
 ---
 
-## 🚀 The Blu Experience
+## The Blu Experience
 
-### 🧠 Intelligence, Unbound
+### Intelligence, Unbound
 Supported by every world-class AI provider. Whether you prefer **Claude 3.7**, **Gemini 2.5 Pro**, or **GPT-4o**, Blu speaks them all. Mix and match models for different tasks—titles, summaries, or deep-dives.
 
-### 🛠️ Tool-Integrated Workflow
+### Tool-Integrated Workflow
 Blu isn't just a chatbot; it's an operator.
 - **File System Mastery**: Glob, grep, read, and write with surgical precision.
 - **System Execution**: Run bash commands directly from the chat.
 - **Smart Patching**: Apply complex diffs and refactors automatically.
 
-### 💎 Premium Terminal UI
+### Premium Terminal UI
 Built with the [Bubble Tea](https://github.com/charmbracelet/bubbletea) framework, Blu offers a state-of-the-art interface:
 - **Session Focus**: Switch between multiple context-heavy sessions instantly (`Ctrl+S`).
 - **Interactive Sidebar**: Visualize file changes and diffs in real-time.
@@ -46,7 +42,7 @@ Built with the [Bubble Tea](https://github.com/charmbracelet/bubbletea) framewor
 
 ---
 
-## 🛠️ Feature Showcase
+## Feature Showcase
 
 | Pillar | Capability |
 | :--- | :--- |
@@ -59,7 +55,7 @@ Built with the [Bubble Tea](https://github.com/charmbracelet/bubbletea) framewor
 
 ---
 
-## 📦 Installation
+## Installation
 
 ### Quick Install
 ```bash
@@ -75,7 +71,7 @@ go build -o blu
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 Blu keeps its soul in `.blu.json`. You can place this in your home directory or locally in a project.
 
@@ -100,7 +96,7 @@ Configure your keys instantly:
 
 ---
 
-## 🤝 Acknowledgments & Credits
+## Acknowledgments & Credits
 
 Blu is stands on the shoulders of giants:
 - **Base Engine**: Created by [opencode-ai/opencode](https://github.com/opencode-ai/opencode).
@@ -109,7 +105,7 @@ Blu is stands on the shoulders of giants:
 
 ---
 
-## 📜 License
+## License
 
 Distributed under the **MIT License**. See `LICENSE` for more information.
 

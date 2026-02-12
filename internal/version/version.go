@@ -16,8 +16,8 @@ func init() {
 		return
 	}
 	mainVersion := info.Main.Version
-	if mainVersion == "" || mainVersion == "(devel)" {
-		// bin not built using `go install`
+	if mainVersion == "" || mainVersion == "(devel)" || mainVersion == "unknown" {
+		// bin not built using `go install` or version not embedded
 		return
 	}
 	// bin built using `go install`
