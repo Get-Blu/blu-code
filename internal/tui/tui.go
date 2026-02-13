@@ -917,6 +917,7 @@ func New(app *app.App) tea.Model {
 		pages: map[page.PageID]tea.Model{
 			page.ChatPage: page.NewChatPage(app),
 			page.LogsPage: page.NewLogsPage(),
+			page.EditorPage: page.NewEditorPage(app),
 		},
 		filepicker: dialog.NewFilepickerCmp(app),
 	}
@@ -951,6 +952,96 @@ If there are Cursor rules (in .cursor/rules/ or .cursorrules) or Copilot rules (
 			}
 		},
 	})
+
+	model.RegisterCommand(dialog.Command{
+		ID:          "editor",
+		Title:       "Editor",
+		Description: "Open the code editor",
+		Handler: func(cmd dialog.Command) tea.Cmd {
+			return util.CmdHandler(page.PageChangeMsg{ID: page.EditorPage})
+		},
+	})
+
+	model.RegisterCommand(dialog.Command{
+		ID:          "model",
+		Title:       "model",
+		Description: "Change the AI model (opens model selection dialog)",
+		Handler: func(cmd dialog.Command) tea.Cmd {
+			return util.CmdHandler(dialog.ModelSelectedMsg{})
+		},
+	})
+
+	model.RegisterCommand(dialog.Command{
+		ID:          "config",
+		Title:       "config",
+		Description: "Show current configuration (model, provider, API key status)",
+		Handler: func(cmd dialog.Command) tea.Cmd {
+			cfg := config.Get()
+			modelInfo := app.CoderAgent.Model()
+			
+			var configInfo strings.Builder
+			configInfo.WriteString("Current Configuration:\n\n")
+			configInfo.WriteString(fmt.Sprintf("Model: %s (%s)\n", modelInfo.Name, modelInfo.ID))
+			configInfo.WriteString(fmt.Sprintf("Max Tokens: %d\n", cfg.Agents[config.AgentCoder].MaxTokens))
+			configInfo.WriteString(fmt.Sprintf("Data Directory: %s\n\n", cfg.Data.Directory))
+			
+			configInfo.WriteString(" Providers:\n")
+			for provider, providerCfg := range cfg.Providers {
+				status := "No API Key"
+				if providerCfg.APIKey != "" {
+					status = "Configured"
+				}
+				if providerCfg.Disabled {
+					status = "Disabled"
+				}
+				configInfo.WriteString(fmt.Sprintf("  • %s: %s\n", provider, status))
+			}
+			
+			configInfo.WriteString("\nTo set an API key, edit ~/.blu.json or .blu.json in your project")
+			configInfo.WriteString("\nUse Ctrl+O to change models")
+			
+			return util.ReportInfo(configInfo.String())
+		},
+	})
+
+	model.RegisterCommand(dialog.Command{
+		ID:          "help",
+		Title:       "help",
+		Description: "Show available commands and keyboard shortcuts",
+		Handler: func(cmd dialog.Command) tea.Cmd {
+			var helpText strings.Builder
+			helpText.WriteString("Blu CLI - Available Commands:\n\n")
+			helpText.WriteString(" Built-in Commands:\n")
+			helpText.WriteString("  /init       - Initialize project (create Blu.md)\n")
+			helpText.WriteString("  /compact    - Compact/summarize current session\n")
+			helpText.WriteString("  /editor     - Open code editor\n")
+			helpText.WriteString("  /model      - Change AI model\n")
+			helpText.WriteString("  /config     - Show current configuration\n")
+			helpText.WriteString("  /help       - Show this help message\n\n")
+			
+			helpText.WriteString("  Keyboard Shortcuts:\n")
+			helpText.WriteString("  Ctrl+K      - Open commands dialog\n")
+			helpText.WriteString("  Ctrl+O      - Model selection\n")
+			helpText.WriteString("  Ctrl+S      - Switch session\n")
+			helpText.WriteString("  Ctrl+F      - File picker\n")
+			helpText.WriteString("  Ctrl+T      - Switch theme\n")
+			helpText.WriteString("  Ctrl+L      - View logs\n")
+			helpText.WriteString("  Ctrl+H      - Toggle help\n")
+			helpText.WriteString("  Ctrl+N      - New session\n")
+			helpText.WriteString("  Ctrl+C      - Quit\n\n")
+			
+			helpText.WriteString("  Configuration Files:\n")
+			helpText.WriteString("  Global: ~/.blu.json or ~/.config/blu/.blu.json\n")
+			helpText.WriteString("  Project: .blu.json (in project root)\n\n")
+			
+			helpText.WriteString("  Custom Commands:\n")
+			helpText.WriteString("  Add .md files to .blu/commands/ to create custom commands\n")
+			helpText.WriteString("  Use $VARIABLE_NAME for arguments in your commands\n")
+			
+			return util.ReportInfo(helpText.String())
+		},
+	})
+
 	// Load custom commands
 	customCommands, err := dialog.LoadCustomCommands()
 	if err != nil {

@@ -14,12 +14,10 @@ func NewGithubLightTheme() *GithubLightTheme {
 	// Github Light color palette
 	background := "#ffffff"
 	foreground := "#24292e"
-	selection := "#0366d61a" // approximation
 	border := "#e1e4e8"
 	comment := "#6a737d"
 	red := "#d73a49"
 	green := "#28a745"
-	yellow := "#dbab09"
 	orange := "#e36209"
 	blue := "#0366d6"
 	purple := "#6f42c1"

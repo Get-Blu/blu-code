@@ -1,85 +1,53 @@
 # Blu
 
-<p align="center">
-  <strong>The next-generation terminal-based AI assistant for software engineers.</strong>
-</p>
+>Blu is a Go-powered terminal UI that brings AI-assisted coding directly into your command line. It connects to leading models and gives them tools to read, analyze, and modify your codebase from an elegant TUI built with Bubble Tea.
 
-<p align="center">
-  <a href="#features">Features</a> •
-  <a href="#installation">Installation</a> •
-  <a href="#configuration">Configuration</a> •
-  <a href="#usage">Usage</a>
-</p>
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Go Version](https://img.shields.io/badge/go-1.21+-00ADD8.svg)](https://go.dev/)
 
----
+## Overview
 
-## What is Blu?
+Blu is a Go-powered terminal UI that transforms your command line into an intelligent development environment. It connects to leading AI models and provides them with powerful tools to read, analyze, and modify your codebase - all from an elegant TUI built with [Bubble Tea](https://github.com/charmbracelet/bubbletea).
 
-**Blu** is a high-performance, Go-powered terminal assistant designed to bridge the gap between your local environment and powerful AI models. It provides a fluid, interactive TUI that allows you to chat with AI, let it analyze your codebase, and execute complex developer workflows without ever leaving your terminal.
+**Key capabilities:**
+- Chat with AI models that can see and edit your files
+- Execute bash commands through AI suggestions
+- Apply complex code refactors automatically
+- Get real-time LSP diagnostics and code intelligence
+- Manage multiple conversation sessions with full context
+- Use Model Context Protocol (MCP) servers for extensibility
 
-> [!IMPORTANT]
-> **Built with on top of [OpenCode](https://github.com/opencode-ai/opencode).**  
-> Blu is a specialized distribution and evolution of the original OpenCode repository, optimized for a premium user experience and unique developer features.
+## Quick Start
 
----
+### Installation
 
-## The Blu Experience
-
-### Intelligence, Unbound
-Supported by every world-class AI provider. Whether you prefer **Claude 3.7**, **Gemini 2.5 Pro**, or **GPT-4o**, Blu speaks them all. Mix and match models for different tasks—titles, summaries, or deep-dives.
-
-### Tool-Integrated Workflow
-Blu isn't just a chatbot; it's an operator.
-- **File System Mastery**: Glob, grep, read, and write with surgical precision.
-- **System Execution**: Run bash commands directly from the chat.
-- **Smart Patching**: Apply complex diffs and refactors automatically.
-
-### Premium Terminal UI
-Built with the [Bubble Tea](https://github.com/charmbracelet/bubbletea) framework, Blu offers a state-of-the-art interface:
-- **Session Focus**: Switch between multiple context-heavy sessions instantly (`Ctrl+S`).
-- **Interactive Sidebar**: Visualize file changes and diffs in real-time.
-- **Vim-like Command Pallet**: Execute custom logic at the speed of thought.
-
----
-
-## Feature Showcase
-
-| Pillar | Capability |
-| :--- | :--- |
-| **Deep Integration** | **LSP Support & Diagnostics**: Real-time error checking and code intelligence via Language Server Protocol. |
-| | **MCP Readiness**: Extend Blu with any Model Context Protocol server for infinite tool potential. |
-| **Workflow Power** | **Named Custom Commands**: Create reusable prompt templates with dynamic placeholders (`Ctrl+K`). |
-| | **Self-Hosting**: Full support for local models via OpenAI-compatible endpoints. |
-| **Smart Management** | **Auto-Compaction**: Intelligent context window management that summarizes long sessions so you never lose track. |
-| | **SQLite Persistence**: Your entire history is stored locally and securely. |
-
----
-
-## Installation
-
-### Quick Install
+**Via install script:**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Get-Blu/blu-code/main/install | bash
 ```
 
-### From Source
+**From source:**
 ```bash
 git clone https://github.com/Get-Blu/blu-code.git
 cd blu-code
 go build -o blu
+blu
 ```
 
----
+### Setup
 
-## Configuration
+1. Set your API key(s):
+```bash
+export ANTHROPIC_API_KEY="your-key-here"
+# or OPENAI_API_KEY, GEMINI_API_KEY
+```
 
-Blu keeps its soul in `.blu.json`. You can place this in your home directory or locally in a project.
-
+2. Create a `.blu.json` config file (optional):
 ```json
 {
   "agents": {
     "coder": {
-      "model": "claude-3.7-sonnet",
+      "model": "claude-sonnet-4-5-20250929",
       "maxTokens": 8192
     }
   },
@@ -87,28 +55,226 @@ Blu keeps its soul in `.blu.json`. You can place this in your home directory or 
 }
 ```
 
+3. Launch Blu:
+```bash
+blu
+```
+
+## Features
+
+### Multi-Model Support
+Switch between Claude, GPT, Gemini, or any OpenAI-compatible endpoint. Use different models for different tasks within the same session.
+
+### Intelligent File Operations
+- **Glob patterns**: Find files matching complex patterns
+- **Smart grep**: Search across your codebase with regex
+- **Atomic edits**: Apply precise diffs and patches
+- **Batch operations**: Modify multiple files in one go
+
+### Development Tools
+- **LSP Integration**: Real-time diagnostics and code intelligence via Language Server Protocol
+- **Command execution**: Run bash commands directly from chat
+- **MCP Support**: Extend with Model Context Protocol servers
+- **Version control aware**: Understands your git context
+
+### Productivity Features
+- **Session management**: Switch between multiple conversations (`Ctrl+S`)
+- **Custom commands**: Create reusable prompt templates (`Ctrl+K`)
+- **Auto-compaction**: Intelligent context window management
+- **SQLite persistence**: Full local history storage
+- **Interactive sidebar**: Visualize file changes in real-time
+
+## Usage
+
+### Basic Workflow
+
+1. **Start a conversation**: Launch `blu` and ask a question
+2. **Let AI explore**: Blu can read files, search your codebase, and understand context
+3. **Review changes**: See proposed file modifications in the sidebar
+4. **Apply or reject**: Accept changes you want, skip the rest
+
+## Keyboard Shortcuts
+
+### Global Shortcuts
+
+| Shortcut | Action                                                  |
+| -------- | ------------------------------------------------------- |
+| `Ctrl+C` | Quit application                                        |
+| `Ctrl+?` | Toggle help dialog                                      |
+| `?`      | Toggle help dialog (when not in editing mode)           |
+| `Ctrl+L` | View logs                                               |
+| `Ctrl+A` | Switch session                                          |
+| `Ctrl+K` | Command dialog                                          |
+| `Ctrl+O` | Toggle model selection dialog                           |
+| `Esc`    | Close current overlay/dialog or return to previous mode |
+
+### Chat Page Shortcuts
+
+| Shortcut | Action                                  |
+| -------- | --------------------------------------- |
+| `Ctrl+N` | Create new session                      |
+| `Ctrl+X` | Cancel current operation/generation     |
+| `i`      | Focus editor (when not in writing mode) |
+| `Esc`    | Exit writing mode and focus messages    |
+
+### Editor Shortcuts
+
+| Shortcut            | Action                                    |
+| ------------------- | ----------------------------------------- |
+| `Ctrl+S`            | Send message (when editor is focused)     |
+| `Enter` or `Ctrl+S` | Send message (when editor is not focused) |
+| `Ctrl+E`            | Open external editor                      |
+| `Esc`               | Blur editor and focus messages            |
+
+### Session Dialog Shortcuts
+
+| Shortcut   | Action           |
+| ---------- | ---------------- |
+| `↑` or `k` | Previous session |
+| `↓` or `j` | Next session     |
+| `Enter`    | Select session   |
+| `Esc`      | Close dialog     |
+
+### Model Dialog Shortcuts
+
+| Shortcut   | Action            |
+| ---------- | ----------------- |
+| `↑` or `k` | Move up           |
+| `↓` or `j` | Move down         |
+| `←` or `h` | Previous provider |
+| `→` or `l` | Next provider     |
+| `Esc`      | Close dialog      |
+
+### Permission Dialog Shortcuts
+
+| Shortcut                | Action                       |
+| ----------------------- | ---------------------------- |
+| `←` or `left`           | Switch options left          |
+| `→` or `right` or `tab` | Switch options right         |
+| `Enter` or `space`      | Confirm selection            |
+| `a`                     | Allow permission             |
+| `A`                     | Allow permission for session |
+| `d`                     | Deny permission              |
+
+### Logs Page Shortcuts
+
+| Shortcut           | Action              |
+| ------------------ | ------------------- |
+| `Backspace` or `q` | Return to chat page |
+
+## Configuration
+
+Place `.blu.json` in your home directory (`~/.blu.json`) or project root:
+
+```json
+{
+  "agents": {
+    "coder": {
+      "model": "claude-sonnet-4-5-20250929",
+      "maxTokens": 8192,
+      "temperature": 0.7
+    },
+    "summarizer": {
+      "model": "gpt-4o-mini",
+      "maxTokens": 2048
+    }
+  },
+  "autoCompact": true,
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed"]
+    }
+  }
+}
+```
+
+### Supported Models
+
+**Anthropic (Claude):**
+- `claude-sonnet-4-5-20250929` - Claude Sonnet 4.5 (recommended for coding)
+- `claude-opus-4-5-20251101` - Claude Opus 4.5 (most capable, slower)
+- `claude-haiku-4-5-20251001` - Claude Haiku 4.5 (fastest, lighter tasks)
+
+**OpenAI:**
+- `gpt-5.2` - GPT-5.2 (high quality, multimodal)
+- `gpt-4o` - GPT-4o (multimodal, fast)
+- `o1` - o1 (advanced reasoning)
+
+**Google:**
+- `gemini-2.0-flash-exp` - Gemini 2.0 Flash (experimental, fast)
+- `gemini-1.5-pro` - Gemini 1.5 Pro (large context window)
+
 ### Environment Variables
-Configure your keys instantly:
-- `ANTHROPIC_API_KEY`
-- `OPENAI_API_KEY`
-- `GEMINI_API_KEY`
-- `BLU_DEBUG=true`
 
----
+| Variable | Purpose |
+|----------|---------|
+| `ANTHROPIC_API_KEY` | Claude API access |
+| `OPENAI_API_KEY` | GPT-4 API access |
+| `GEMINI_API_KEY` | Gemini API access |
+| `BLU_DEBUG=true` | Enable debug logging |
+| `BLU_CONFIG=/path/to/.blu.json` | Custom config location |
 
-## Acknowledgments & Credits
+## Troubleshooting
 
-Blu is stands on the shoulders of giants:
-- **Base Engine**: Created by [opencode-ai/opencode](https://github.com/opencode-ai/opencode).
-- **Core Design**: Inspired by the amazing work of [@adamdottv](https://github.com/adamdottv).
-- **LSP Foundation**: Powered by logic from [@isaacphi's](https://github.com/isaacphi) `mcp-language-server`.
+**Blu won't start**
+- Check your API keys are set
+- Verify Go 1.21+ is installed
+- Try `blu --debug` for detailed logs
 
----
+**AI can't see my files**
+- Ensure you're running Blu from your project directory
+- Check file permissions
+- Verify paths in error messages
+
+**Context window errors**
+- Enable `autoCompact` in config
+- Start a new session for fresh context
+- Use more concise prompts
+
+## Building from Source
+
+```bash
+# Clone the repository
+git clone https://github.com/Get-Blu/blu-code.git
+cd blu-code
+
+# Install dependencies
+go mod download
+
+# Build
+go build -o blu
+
+# Run tests
+go test ./...
+
+# Install globally
+sudo mv blu /usr/local/bin/
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues or pull requests.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## Credits
+
+Blu builds on the excellent work of:
+
+- **[OpenCode](https://github.com/opencode-ai/opencode)** - The foundation Blu is built upon
+- **[@adamdottv](https://github.com/adamdottv)** - Original OpenCode design and architecture
+- **[@isaacphi](https://github.com/isaacphi)** - LSP integration via `mcp-language-server`
+- **[Bubble Tea](https://github.com/charmbracelet/bubbletea)** - Excellent TUI framework
 
 ## License
 
-Distributed under the **MIT License**. See `LICENSE` for more information.
+MIT License - see [LICENSE](LICENSE) for details.
 
-<p align="center">
-  Made by Garv Agnihotri
-</p>
+---
+
+**Created by [Garv Agnihotri](https://github.com/Get-Blu)**
