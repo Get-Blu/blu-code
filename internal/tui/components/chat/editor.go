@@ -2,8 +2,6 @@ package chat
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 	"slices"
 	"strings"
 	"unicode"
@@ -34,14 +32,12 @@ type editorCmp struct {
 }
 
 type EditorKeyMaps struct {
-	Send       key.Binding
-	OpenEditor key.Binding
+	Send key.Binding
 }
 
 type bluredEditorKeyMaps struct {
-	Send       key.Binding
-	Focus      key.Binding
-	OpenEditor key.Binding
+	Send  key.Binding
+	Focus key.Binding
 }
 type DeleteAttachmentKeyMaps struct {
 	AttachmentDeleteMode key.Binding
@@ -53,10 +49,6 @@ var editorMaps = EditorKeyMaps{
 	Send: key.NewBinding(
 		key.WithKeys("enter", "ctrl+s"),
 		key.WithHelp("enter", "send message"),
-	),
-	OpenEditor: key.NewBinding(
-		key.WithKeys("ctrl+e"),
-		key.WithHelp("ctrl+e", "open editor"),
 	),
 }
 
@@ -78,42 +70,6 @@ var DeleteKeyMaps = DeleteAttachmentKeyMaps{
 const (
 	maxAttachments = 5
 )
-
-func (m *editorCmp) openEditor() tea.Cmd {
-	editor := os.Getenv("EDITOR")
-	if editor == "" {
-		editor = "nvim"
-	}
-
-	tmpfile, err := os.CreateTemp("", "msg_*.md")
-	if err != nil {
-		return util.ReportError(err)
-	}
-	tmpfile.Close()
-	c := exec.Command(editor, tmpfile.Name()) //nolint:gosec
-	c.Stdin = os.Stdin
-	c.Stdout = os.Stdout
-	c.Stderr = os.Stderr
-	return tea.ExecProcess(c, func(err error) tea.Msg {
-		if err != nil {
-			return util.ReportError(err)
-		}
-		content, err := os.ReadFile(tmpfile.Name())
-		if err != nil {
-			return util.ReportError(err)
-		}
-		if len(content) == 0 {
-			return util.ReportWarn("Message is empty")
-		}
-		os.Remove(tmpfile.Name())
-		attachments := m.attachments
-		m.attachments = nil
-		return SendMsg{
-			Text:        string(content),
-			Attachments: attachments,
-		}
-	})
-}
 
 func (m *editorCmp) Init() tea.Cmd {
 	return textarea.Blink
@@ -187,12 +143,6 @@ func (m *editorCmp) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if key.Matches(msg, messageKeys.PageUp) || key.Matches(msg, messageKeys.PageDown) ||
 			key.Matches(msg, messageKeys.HalfPageUp) || key.Matches(msg, messageKeys.HalfPageDown) {
 			return m, nil
-		}
-		if key.Matches(msg, editorMaps.OpenEditor) {
-			if m.app.CoderAgent.IsSessionBusy(m.session.ID) {
-				return m, util.ReportWarn("Agent is working, please wait...")
-			}
-			return m, m.openEditor()
 		}
 		if key.Matches(msg, DeleteKeyMaps.Escape) {
 			m.deleteMode = false

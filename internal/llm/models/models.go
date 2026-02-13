@@ -26,6 +26,8 @@ type Model struct {
 const ( // GEMINI
 	// Bedrock
 	BedrockClaude37Sonnet ModelID = "bedrock.claude-3.7-sonnet"
+	BedrockClaude46Opus   ModelID = "bedrock.claude-4.6-opus"
+	BedrockClaude5Sonnet  ModelID = "bedrock.claude-5-sonnet"
 )
 
 const (
@@ -40,11 +42,14 @@ var ProviderPopularity = map[ModelProvider]int{
 	ProviderAnthropic:  2,
 	ProviderOpenAI:     3,
 	ProviderGemini:     4,
-	ProviderGROQ:       5,
-	ProviderOpenRouter: 6,
-	ProviderBedrock:    7,
-	ProviderAzure:      8,
-	ProviderVertexAI:   9,
+	ProviderDeepSeek:   5,
+	ProviderMistral:    6,
+	ProviderGROQ:       7,
+	ProviderOpenRouter: 8,
+	ProviderBedrock:    9,
+	ProviderAzure:      10,
+	ProviderXAI:        11,
+	ProviderVertexAI:   12,
 }
 
 var SupportedModels = map[ModelID]Model{
@@ -83,6 +88,26 @@ var SupportedModels = map[ModelID]Model{
 		CostPer1MOutCached: 0.30,
 		CostPer1MOut:       15.0,
 	},
+	BedrockClaude46Opus: {
+		ID:                 BedrockClaude46Opus,
+		Name:               "Bedrock: Claude 4.6 Opus",
+		Provider:           ProviderBedrock,
+		APIModel:           "anthropic.claude-4-6-opus-20260205-v1:0",
+		CostPer1MIn:        15.0,
+		CostPer1MInCached:  18.75,
+		CostPer1MOutCached: 1.50,
+		CostPer1MOut:       75.0,
+	},
+	BedrockClaude5Sonnet: {
+		ID:                 BedrockClaude5Sonnet,
+		Name:               "Bedrock: Claude 5 Sonnet",
+		Provider:           ProviderBedrock,
+		APIModel:           "anthropic.claude-5-sonnet-20260530-v1:0", // Placeholder date
+		CostPer1MIn:        2.0,
+		CostPer1MInCached:  2.5,
+		CostPer1MOutCached: 0.2,
+		CostPer1MOut:       10.0,
+	},
 }
 
 func init() {
@@ -95,4 +120,6 @@ func init() {
 	maps.Copy(SupportedModels, XAIModels)
 	maps.Copy(SupportedModels, VertexAIGeminiModels)
 	maps.Copy(SupportedModels, CopilotModels)
+	maps.Copy(SupportedModels, DeepSeekModels)
+	maps.Copy(SupportedModels, MistralModels)
 }

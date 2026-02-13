@@ -29,16 +29,32 @@ type ModelSelectedMsg struct {
 // CloseModelDialogMsg is sent when a model is selected
 type CloseModelDialogMsg struct{}
 
+// ProviderSelectedMsg is sent when a provider is selected (from the new provider dialog)
+type ProviderSelectedMsg struct {
+	Provider models.ModelProvider
+}
+
+// CloseProviderDialogMsg is sent when the provider dialog is closed
+type CloseProviderDialogMsg struct{}
+
 // ModelDialog interface for the model selection dialog
 type ModelDialog interface {
 	tea.Model
 	layout.Bindings
 }
 
+type dialogMode int
+
+const (
+	modeModels dialogMode = iota
+	modeProviders
+)
+
 type modelDialogCmp struct {
 	models             []models.Model
 	provider           models.ModelProvider
 	availableProviders []models.ModelProvider
+	mode               dialogMode
 
 	selectedIdx     int
 	width           int
@@ -105,7 +121,11 @@ var modelKeys = modelKeyMap{
 }
 
 func (m *modelDialogCmp) Init() tea.Cmd {
-	m.setupModels()
+	if m.mode == modeProviders {
+		m.setupProvidersOnly()
+	} else {
+		m.setupModels()
+	}
 	return nil
 }
 
@@ -126,9 +146,16 @@ func (m *modelDialogCmp) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.switchProvider(1)
 			}
 		case key.Matches(msg, modelKeys.Enter):
+			if m.mode == modeProviders {
+				p := m.availableProviders[m.selectedIdx]
+				return m, util.CmdHandler(ProviderSelectedMsg{Provider: p})
+			}
 			util.ReportInfo(fmt.Sprintf("selected model: %s", m.models[m.selectedIdx].Name))
 			return m, util.CmdHandler(ModelSelectedMsg{Model: m.models[m.selectedIdx]})
 		case key.Matches(msg, modelKeys.Escape):
+			if m.mode == modeProviders {
+				return m, util.CmdHandler(CloseProviderDialogMsg{})
+			}
 			return m, util.CmdHandler(CloseModelDialogMsg{})
 		}
 	case tea.WindowSizeMsg:
@@ -141,11 +168,16 @@ func (m *modelDialogCmp) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // moveSelectionUp moves the selection up or wraps to bottom
 func (m *modelDialogCmp) moveSelectionUp() {
+	limit := len(m.models)
+	if m.mode == modeProviders {
+		limit = len(m.availableProviders)
+	}
+
 	if m.selectedIdx > 0 {
 		m.selectedIdx--
 	} else {
-		m.selectedIdx = len(m.models) - 1
-		m.scrollOffset = max(0, len(m.models)-numVisibleModels)
+		m.selectedIdx = limit - 1
+		m.scrollOffset = max(0, limit-numVisibleModels)
 	}
 
 	// Keep selection visible
@@ -156,7 +188,12 @@ func (m *modelDialogCmp) moveSelectionUp() {
 
 // moveSelectionDown moves the selection down or wraps to top
 func (m *modelDialogCmp) moveSelectionDown() {
-	if m.selectedIdx < len(m.models)-1 {
+	limit := len(m.models)
+	if m.mode == modeProviders {
+		limit = len(m.availableProviders)
+	}
+
+	if m.selectedIdx < limit-1 {
 		m.selectedIdx++
 	} else {
 		m.selectedIdx = 0
@@ -190,25 +227,48 @@ func (m *modelDialogCmp) View() string {
 	baseStyle := styles.BaseStyle()
 
 	// Capitalize first letter of provider name
-	providerName := strings.ToUpper(string(m.provider)[:1]) + string(m.provider[1:])
+	var titleText string
+	if m.mode == modeProviders {
+		titleText = "Select AI Provider"
+	} else {
+		providerName := strings.ToUpper(string(m.provider)[:1]) + string(m.provider[1:])
+		titleText = fmt.Sprintf("Select %s Model", providerName)
+	}
+
 	title := baseStyle.
 		Foreground(t.Primary()).
 		Bold(true).
 		Width(maxDialogWidth).
 		Padding(0, 0, 1).
-		Render(fmt.Sprintf("Select %s Model", providerName))
+		Render(titleText)
 
 	// Render visible models
-	endIdx := min(m.scrollOffset+numVisibleModels, len(m.models))
-	modelItems := make([]string, 0, endIdx-m.scrollOffset)
-
-	for i := m.scrollOffset; i < endIdx; i++ {
-		itemStyle := baseStyle.Width(maxDialogWidth)
-		if i == m.selectedIdx {
-			itemStyle = itemStyle.Background(t.Primary()).
-				Foreground(t.Background()).Bold(true)
+	var items []string
+	if m.mode == modeProviders {
+		endIdx := min(m.scrollOffset+numVisibleModels, len(m.availableProviders))
+		items = make([]string, 0, endIdx-m.scrollOffset)
+		for i := m.scrollOffset; i < endIdx; i++ {
+			itemStyle := baseStyle.Width(maxDialogWidth)
+			if i == m.selectedIdx {
+				itemStyle = itemStyle.Background(t.Primary()).
+					Foreground(t.Background()).Bold(true)
+			}
+			pName := string(m.availableProviders[i])
+			pName = strings.ToUpper(pName[:1]) + pName[1:]
+			items = append(items, itemStyle.Render(pName))
 		}
-		modelItems = append(modelItems, itemStyle.Render(m.models[i].Name))
+	} else {
+		endIdx := min(m.scrollOffset+numVisibleModels, len(m.models))
+		items = make([]string, 0, endIdx-m.scrollOffset)
+
+		for i := m.scrollOffset; i < endIdx; i++ {
+			itemStyle := baseStyle.Width(maxDialogWidth)
+			if i == m.selectedIdx {
+				itemStyle = itemStyle.Background(t.Primary()).
+					Foreground(t.Background()).Bold(true)
+			}
+			items = append(items, itemStyle.Render(m.models[i].Name))
+		}
 	}
 
 	scrollIndicator := m.getScrollIndicators(maxDialogWidth)
@@ -216,7 +276,7 @@ func (m *modelDialogCmp) View() string {
 	content := lipgloss.JoinVertical(
 		lipgloss.Left,
 		title,
-		baseStyle.Width(maxDialogWidth).Render(lipgloss.JoinVertical(lipgloss.Left, modelItems...)),
+		baseStyle.Width(maxDialogWidth).Render(lipgloss.JoinVertical(lipgloss.Left, items...)),
 		scrollIndicator,
 	)
 
@@ -231,16 +291,21 @@ func (m *modelDialogCmp) View() string {
 func (m *modelDialogCmp) getScrollIndicators(maxWidth int) string {
 	var indicator string
 
-	if len(m.models) > numVisibleModels {
+	limit := len(m.models)
+	if m.mode == modeProviders {
+		limit = len(m.availableProviders)
+	}
+
+	if limit > numVisibleModels {
 		if m.scrollOffset > 0 {
 			indicator += "↑ "
 		}
-		if m.scrollOffset+numVisibleModels < len(m.models) {
+		if m.scrollOffset+numVisibleModels < limit {
 			indicator += "↓ "
 		}
 	}
 
-	if m.hScrollPossible {
+	if m.hScrollPossible && m.mode == modeModels {
 		if m.hScrollOffset > 0 {
 			indicator = "← " + indicator
 		}
@@ -368,6 +433,34 @@ func getModelsForProvider(provider models.ModelProvider) []models.Model {
 	return providerModels
 }
 
+func (m *modelDialogCmp) setupProvidersOnly() {
+	// Get all available providers, even disabled ones for setup
+	var providers []models.ModelProvider
+	for p := range models.ProviderPopularity {
+		providers = append(providers, p)
+	}
+
+	// Sort by popularity
+	slices.SortFunc(providers, func(a, b models.ModelProvider) int {
+		rA := models.ProviderPopularity[a]
+		rB := models.ProviderPopularity[b]
+		if rA == 0 {
+			rA = 999
+		}
+		if rB == 0 {
+			rB = 999
+		}
+		return rA - rB
+	})
+
+	m.availableProviders = providers
+	m.mode = modeProviders
+}
+
 func NewModelDialogCmp() ModelDialog {
-	return &modelDialogCmp{}
+	return &modelDialogCmp{mode: modeModels}
+}
+
+func NewProviderDialogCmp() ModelDialog {
+	return &modelDialogCmp{mode: modeProviders}
 }

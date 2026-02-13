@@ -21,6 +21,10 @@ const (
 	O3Mini       ModelID = "o3-mini"
 	O3Ultra      ModelID = "o3-ultra"
 	O4Mini       ModelID = "o4-mini"
+	GPT5_2       ModelID = "gpt-5.2"
+	GPT5_3Codex  ModelID = "gpt-5.3-codex"
+	GPTOSS120B   ModelID = "gpt-oss-120b"
+	GPTOSS20B    ModelID = "gpt-oss-20b"
 )
 
 var OpenAIModels = map[ModelID]Model{
@@ -236,6 +240,60 @@ var OpenAIModels = map[ModelID]Model{
 		CostPer1MOut:        60.00,
 		ContextWindow:       200_000,
 		CanReason:           true,
+		SupportsAttachments: true,
+	},
+	GPT5_2: {
+		ID:                  GPT5_2,
+		Name:                "GPT 5.2",
+		Provider:            ProviderOpenAI,
+		APIModel:            "gpt-5.2",
+		CostPer1MIn:         8.00,
+		CostPer1MInCached:   4.00,
+		CostPer1MOutCached:  0.0,
+		CostPer1MOut:        24.00,
+		ContextWindow:       400_000,
+		DefaultMaxTokens:    128_000,
+		CanReason:           true,
+		SupportsAttachments: true,
+	},
+	GPT5_3Codex: {
+		ID:                  GPT5_3Codex,
+		Name:                "GPT 5.3 Codex",
+		Provider:            ProviderOpenAI,
+		APIModel:            "gpt-5.3-codex",
+		CostPer1MIn:         6.00,
+		CostPer1MInCached:   3.00,
+		CostPer1MOutCached:  0.0,
+		CostPer1MOut:        18.00,
+		ContextWindow:       500_000,
+		DefaultMaxTokens:    128_000,
+		CanReason:           true,
+		SupportsAttachments: true,
+	},
+	GPTOSS120B: {
+		ID:                  GPTOSS120B,
+		Name:                "GPT OSS 120B",
+		Provider:            ProviderOpenAI,
+		APIModel:            "gpt-oss-120b",
+		CostPer1MIn:         0.50,
+		CostPer1MInCached:   0.25,
+		CostPer1MOutCached:  0.0,
+		CostPer1MOut:        1.50,
+		ContextWindow:       128_000,
+		DefaultMaxTokens:    32_000,
+		SupportsAttachments: true,
+	},
+	GPTOSS20B: {
+		ID:                  GPTOSS20B,
+		Name:                "GPT OSS 20B",
+		Provider:            ProviderOpenAI,
+		APIModel:            "gpt-oss-20b",
+		CostPer1MIn:         0.10,
+		CostPer1MInCached:   0.05,
+		CostPer1MOutCached:  0.0,
+		CostPer1MOut:        0.30,
+		ContextWindow:       128_000,
+		DefaultMaxTokens:    32_000,
 		SupportsAttachments: true,
 	},
 }

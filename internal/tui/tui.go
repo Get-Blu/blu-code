@@ -32,6 +32,7 @@ type keyMap struct {
 	Commands      key.Binding
 	Filepicker    key.Binding
 	Models        key.Binding
+	Providers     key.Binding
 	SwitchTheme   key.Binding
 }
 
@@ -77,6 +78,10 @@ var keys = keyMap{
 	SwitchTheme: key.NewBinding(
 		key.WithKeys("ctrl+t"),
 		key.WithHelp("ctrl+t", "switch theme"),
+	),
+	Providers: key.NewBinding(
+		key.WithKeys("ctrl+p"),
+		key.WithHelp("ctrl+p", "provider selection"),
 	),
 }
 
@@ -124,6 +129,12 @@ type appModel struct {
 	showModelDialog bool
 	modelDialog     dialog.ModelDialog
 
+	showProviderDialog bool
+	providerDialog     dialog.ModelDialog
+
+	showAPIKeyDialog bool
+	apiKeyDialog     dialog.APIKeyDialogCmp
+
 	showInitDialog bool
 	initDialog     dialog.InitDialogCmp
 
@@ -140,7 +151,7 @@ type appModel struct {
 	compactingMessage string
 }
 
-func (a appModel) Init() tea.Cmd {
+func (a *appModel) Init() tea.Cmd {
 	var cmds []tea.Cmd
 	cmd := a.pages[a.currentPage].Init()
 	a.loadedPages[a.currentPage] = true
@@ -163,6 +174,8 @@ func (a appModel) Init() tea.Cmd {
 	cmds = append(cmds, cmd)
 	cmd = a.themeDialog.Init()
 	cmds = append(cmds, cmd)
+	cmd = a.providerDialog.Init()
+	cmds = append(cmds, cmd)
 
 	// Check if we should show the init dialog
 	cmds = append(cmds, func() tea.Msg {
@@ -179,7 +192,7 @@ func (a appModel) Init() tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func (a appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (a *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
@@ -355,7 +368,6 @@ func (a appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case dialog.CloseModelDialogMsg:
 		a.showModelDialog = false
 		return a, nil
-
 	case dialog.ModelSelectedMsg:
 		a.showModelDialog = false
 
@@ -365,6 +377,27 @@ func (a appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		return a, util.ReportInfo(fmt.Sprintf("Model changed to %s", model.Name))
+
+	case dialog.CloseProviderDialogMsg:
+		a.showProviderDialog = false
+		return a, nil
+
+	case dialog.ProviderSelectedMsg:
+		a.showProviderDialog = false
+		a.apiKeyDialog = dialog.NewAPIKeyDialogCmp(msg.Provider)
+		a.showAPIKeyDialog = true
+		return a, a.apiKeyDialog.Init()
+
+	case dialog.CloseAPIKeyDialogMsg:
+		a.showAPIKeyDialog = false
+		return a, nil
+
+	case dialog.APIKeySelectedMsg:
+		a.showAPIKeyDialog = false
+		if err := config.UpdateProviderAPIKey(msg.Provider, msg.APIKey); err != nil {
+			return a, util.ReportError(err)
+		}
+		return a, util.ReportInfo(fmt.Sprintf("API Key saved for %s", msg.Provider))
 
 	case dialog.ShowInitDialogMsg:
 		a.showInitDialog = msg.Show
@@ -510,6 +543,16 @@ func (a appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return a, nil
 			}
 			return a, nil
+		case key.Matches(msg, keys.Providers):
+			if a.showProviderDialog {
+				a.showProviderDialog = false
+				return a, nil
+			}
+			if a.currentPage == page.ChatPage && !a.showQuit && !a.showPermissions && !a.showSessionDialog && !a.showCommandDialog {
+				a.showProviderDialog = true
+				return a, nil
+			}
+			return a, nil
 		case key.Matches(msg, keys.SwitchTheme):
 			if !a.showQuit && !a.showPermissions && !a.showSessionDialog && !a.showCommandDialog {
 				// Show theme switcher dialog
@@ -636,6 +679,24 @@ func (a appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	if a.showProviderDialog {
+		d, providerCmd := a.providerDialog.Update(msg)
+		a.providerDialog = d.(dialog.ModelDialog)
+		cmds = append(cmds, providerCmd)
+		if _, ok := msg.(tea.KeyMsg); ok {
+			return a, tea.Batch(cmds...)
+		}
+	}
+
+	if a.showAPIKeyDialog {
+		d, apiKeyCmd := a.apiKeyDialog.Update(msg)
+		a.apiKeyDialog = d.(dialog.APIKeyDialogCmp)
+		cmds = append(cmds, apiKeyCmd)
+		if _, ok := msg.(tea.KeyMsg); ok {
+			return a, tea.Batch(cmds...)
+		}
+	}
+
 	if a.showInitDialog {
 		d, initCmd := a.initDialog.Update(msg)
 		a.initDialog = d.(dialog.InitDialogCmp)
@@ -699,7 +760,7 @@ func (a *appModel) moveToPage(pageID page.PageID) tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func (a appModel) View() string {
+func (a *appModel) View() string {
 	components := []string{
 		a.pages[a.currentPage].View(),
 	}
@@ -781,6 +842,51 @@ func (a appModel) View() string {
 		a.help.SetBindings(bindings)
 
 		overlay := a.help.View()
+		row := lipgloss.Height(appView) / 2
+		row -= lipgloss.Height(overlay) / 2
+		col := lipgloss.Width(appView) / 2
+		col -= lipgloss.Width(overlay) / 2
+		appView = layout.PlaceOverlay(
+			col,
+			row,
+			overlay,
+			appView,
+			true,
+		)
+	}
+
+	if a.showModelDialog {
+		overlay := a.modelDialog.View()
+		row := lipgloss.Height(appView) / 2
+		row -= lipgloss.Height(overlay) / 2
+		col := lipgloss.Width(appView) / 2
+		col -= lipgloss.Width(overlay) / 2
+		appView = layout.PlaceOverlay(
+			col,
+			row,
+			overlay,
+			appView,
+			true,
+		)
+	}
+
+	if a.showProviderDialog {
+		overlay := a.providerDialog.View()
+		row := lipgloss.Height(appView) / 2
+		row -= lipgloss.Height(overlay) / 2
+		col := lipgloss.Width(appView) / 2
+		col -= lipgloss.Width(overlay) / 2
+		appView = layout.PlaceOverlay(
+			col,
+			row,
+			overlay,
+			appView,
+			true,
+		)
+	}
+
+	if a.showAPIKeyDialog {
+		overlay := a.apiKeyDialog.View()
 		row := lipgloss.Height(appView) / 2
 		row -= lipgloss.Height(overlay) / 2
 		col := lipgloss.Width(appView) / 2
@@ -917,9 +1023,9 @@ func New(app *app.App) tea.Model {
 		pages: map[page.PageID]tea.Model{
 			page.ChatPage: page.NewChatPage(app),
 			page.LogsPage: page.NewLogsPage(),
-			page.EditorPage: page.NewEditorPage(app),
 		},
-		filepicker: dialog.NewFilepickerCmp(app),
+		filepicker:     dialog.NewFilepickerCmp(app),
+		providerDialog: dialog.NewProviderDialogCmp(),
 	}
 
 	model.RegisterCommand(dialog.Command{
@@ -950,15 +1056,6 @@ If there are Cursor rules (in .cursor/rules/ or .cursorrules) or Copilot rules (
 			return func() tea.Msg {
 				return startCompactSessionMsg{}
 			}
-		},
-	})
-
-	model.RegisterCommand(dialog.Command{
-		ID:          "editor",
-		Title:       "Editor",
-		Description: "Open the code editor",
-		Handler: func(cmd dialog.Command) tea.Cmd {
-			return util.CmdHandler(page.PageChangeMsg{ID: page.EditorPage})
 		},
 	})
 
@@ -1014,7 +1111,6 @@ If there are Cursor rules (in .cursor/rules/ or .cursorrules) or Copilot rules (
 			helpText.WriteString(" Built-in Commands:\n")
 			helpText.WriteString("  /init       - Initialize project (create Blu.md)\n")
 			helpText.WriteString("  /compact    - Compact/summarize current session\n")
-			helpText.WriteString("  /editor     - Open code editor\n")
 			helpText.WriteString("  /model      - Change AI model\n")
 			helpText.WriteString("  /config     - Show current configuration\n")
 			helpText.WriteString("  /help       - Show this help message\n\n")

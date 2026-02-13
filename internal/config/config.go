@@ -929,6 +929,30 @@ func UpdateTheme(themeName string) error {
 	})
 }
 
+// UpdateProviderAPIKey updates the API key for a provider in the configuration and writes it to the config file.
+func UpdateProviderAPIKey(provider models.ModelProvider, apiKey string) error {
+	if cfg == nil {
+		return fmt.Errorf("config not loaded")
+	}
+
+	// Update the in-memory config
+	p := cfg.Providers[provider]
+	p.APIKey = apiKey
+	p.Disabled = false
+	cfg.Providers[provider] = p
+
+	// Update the file config
+	return updateCfgFile(func(config *Config) {
+		if config.Providers == nil {
+			config.Providers = make(map[models.ModelProvider]Provider)
+		}
+		p := config.Providers[provider]
+		p.APIKey = apiKey
+		p.Disabled = false
+		config.Providers[provider] = p
+	})
+}
+
 // Tries to load Github token from all possible locations
 func LoadGitHubToken() (string, error) {
 	// First check environment variable

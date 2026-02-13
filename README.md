@@ -103,9 +103,10 @@ Switch between Claude, GPT, Gemini, or any OpenAI-compatible endpoint. Use diffe
 | `Ctrl+?` | Toggle help dialog                                      |
 | `?`      | Toggle help dialog (when not in editing mode)           |
 | `Ctrl+L` | View logs                                               |
-| `Ctrl+A` | Switch session                                          |
+| `Ctrl+S` | Switch session                                          |
 | `Ctrl+K` | Command dialog                                          |
 | `Ctrl+O` | Toggle model selection dialog                           |
+| `Ctrl+P` | Toggle provider selection (API key configuration)      |
 | `Esc`    | Close current overlay/dialog or return to previous mode |
 
 ### Chat Page Shortcuts
@@ -141,9 +142,18 @@ Switch between Claude, GPT, Gemini, or any OpenAI-compatible endpoint. Use diffe
 | ---------- | ----------------- |
 | `↑` or `k` | Move up           |
 | `↓` or `j` | Move down         |
-| `←` or `h` | Previous provider |
-| `→` or `l` | Next provider     |
-| `Esc`      | Close dialog      |
+| `←` or `h` | Previous provider (within model dialog) |
+| `→` or `l` | Next provider (within model dialog)     |
+| `Esc`      | Close dialog                            |
+
+### Provider & API Key Dialog Shortcuts
+
+| Shortcut | Action               |
+| -------- | -------------------- |
+| `↑` / `↓` | Move up/down         |
+| `Enter`  | Select provider      |
+| `Esc`    | Close dialog         |
+| `Enter`  | Save API key (input) |
 
 ### Permission Dialog Shortcuts
 
@@ -170,7 +180,7 @@ Place `.blu.json` in your home directory (`~/.blu.json`) or project root:
 {
   "agents": {
     "coder": {
-      "model": "claude-sonnet-4-5-20250929",
+      "model": "claude-3.7-sonnet",
       "maxTokens": 8192,
       "temperature": 0.7
     },
@@ -192,18 +202,26 @@ Place `.blu.json` in your home directory (`~/.blu.json`) or project root:
 ### Supported Models
 
 **Anthropic (Claude):**
-- `claude-sonnet-4-5-20250929` - Claude Sonnet 4.5 (recommended for coding)
-- `claude-opus-4-5-20251101` - Claude Opus 4.5 (most capable, slower)
-- `claude-haiku-4-5-20251001` - Claude Haiku 4.5 (fastest, lighter tasks)
+- `claude-4.6-opus` - Claude 4.6 Opus (flagship capability)
+- `claude-3.7-sonnet` - Claude 3.7 Sonnet (recommended for coding)
 
 **OpenAI:**
-- `gpt-5.2` - GPT-5.2 (high quality, multimodal)
-- `gpt-4o` - GPT-4o (multimodal, fast)
-- `o1` - o1 (advanced reasoning)
+- `gpt-5.3-codex` - GPT-5.3 Codex (latest agentic flagship)
+- `gpt-5.2` - GPT-5.2 (multimodal, fast)
+- `o3-ultra` - O3 Ultra (advanced reasoning)
 
 **Google:**
-- `gemini-2.0-flash-exp` - Gemini 2.0 Flash (experimental, fast)
-- `gemini-1.5-pro` - Gemini 1.5 Pro (large context window)
+- `gemini-3-deep-think` - Gemini 3 Deep Think (advanced scientific/engineering)
+- `gemini-3.0-pro` - Gemini 3.0 Pro (multimodal reasoning)
+- `gemini-2.0-flash` - Gemini 2.0 Flash (high speed intelligence)
+
+**DeepSeek:**
+- `deepseek-v3.2` - DeepSeek V3.2
+- `deepseek-r1` - DeepSeek R1 (reasoning model)
+
+**xAI:**
+- `grok-4.1` - Grok 4.1
+- `grok-4.20` - Grok 4.20 (Enterprise)
 
 ### Environment Variables
 
@@ -274,9 +292,5 @@ Blu builds on the excellent work of:
 ## License
 
 Distributed under the **MIT License**. See `LICENSE` for more information.
-
-<p align="center">
-  Made by Garv Agnihotri
-</p>
 
 **Created by [Garv Agnihotri](https://github.com/Get-Blu)**

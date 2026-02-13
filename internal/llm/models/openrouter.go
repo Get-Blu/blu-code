@@ -28,6 +28,12 @@ const (
 	OpenRouterClaude35Haiku  ModelID = "openrouter.claude-3.5-haiku"
 	OpenRouterClaude3Opus    ModelID = "openrouter.claude-3-opus"
 	OpenRouterDeepSeekR1Free ModelID = "openrouter.deepseek-r1-free"
+	OpenRouterGemini3DeepThink ModelID = "openrouter.gemini-3-deep-think"
+	OpenRouterGPT5_2         ModelID = "openrouter.gpt-5.2"
+	OpenRouterGPT5_3Codex    ModelID = "openrouter.gpt-5.3-codex"
+	OpenRouterXAIGrok4_1     ModelID = "openrouter.grok-4.1"
+	OpenRouterXAIGrok4_20    ModelID = "openrouter.grok-4.20"
+	OpenRouterMistralLarge3  ModelID = "openrouter.mistral-large-3"
 )
 
 var OpenRouterModels = map[ModelID]Model{
@@ -333,12 +339,88 @@ var OpenRouterModels = map[ModelID]Model{
 		ID:                 OpenRouterDeepSeekR1Free,
 		Name:               "OpenRouter – DeepSeek R1 Free",
 		Provider:           ProviderOpenRouter,
-		APIModel:           "deepseek/deepseek-r1-0528:free",
+		APIModel:           "deepseek/deepseek-r1:free",
 		CostPer1MIn:        0,
 		CostPer1MInCached:  0,
 		CostPer1MOut:       0,
 		CostPer1MOutCached: 0,
 		ContextWindow:      163_840,
 		DefaultMaxTokens:   10000,
+	},
+	OpenRouterGemini3DeepThink: {
+		ID:                 OpenRouterGemini3DeepThink,
+		Name:               "OpenRouter – Gemini 3 Deep Think",
+		Provider:           ProviderOpenRouter,
+		APIModel:           "google/gemini-3-deep-think",
+		CostPer1MIn:        GeminiModels[Gemini3DeepThink].CostPer1MIn,
+		CostPer1MInCached:  GeminiModels[Gemini3DeepThink].CostPer1MInCached,
+		CostPer1MOut:       GeminiModels[Gemini3DeepThink].CostPer1MOut,
+		CostPer1MOutCached: GeminiModels[Gemini3DeepThink].CostPer1MOutCached,
+		ContextWindow:      GeminiModels[Gemini3DeepThink].ContextWindow,
+		DefaultMaxTokens:   GeminiModels[Gemini3DeepThink].DefaultMaxTokens,
+	},
+	OpenRouterGPT5_2: {
+		ID:                 OpenRouterGPT5_2,
+		Name:               "OpenRouter – GPT 5.2",
+		Provider:           ProviderOpenRouter,
+		APIModel:           "openai/gpt-5.2",
+		CostPer1MIn:        OpenAIModels[GPT5_2].CostPer1MIn,
+		CostPer1MInCached:  OpenAIModels[GPT5_2].CostPer1MInCached,
+		CostPer1MOut:       OpenAIModels[GPT5_2].CostPer1MOut,
+		CostPer1MOutCached: OpenAIModels[GPT5_2].CostPer1MOutCached,
+		ContextWindow:      OpenAIModels[GPT5_2].ContextWindow,
+		DefaultMaxTokens:   OpenAIModels[GPT5_2].DefaultMaxTokens,
+		CanReason:          OpenAIModels[GPT5_2].CanReason,
+	},
+	OpenRouterGPT5_3Codex: {
+		ID:                 OpenRouterGPT5_3Codex,
+		Name:               "OpenRouter – GPT 5.3 Codex",
+		Provider:           ProviderOpenRouter,
+		APIModel:           "openai/gpt-5.3-codex",
+		CostPer1MIn:        OpenAIModels[GPT5_3Codex].CostPer1MIn,
+		CostPer1MInCached:  OpenAIModels[GPT5_3Codex].CostPer1MInCached,
+		CostPer1MOut:       OpenAIModels[GPT5_3Codex].CostPer1MOut,
+		CostPer1MOutCached: OpenAIModels[GPT5_3Codex].CostPer1MOutCached,
+		ContextWindow:      OpenAIModels[GPT5_3Codex].ContextWindow,
+		DefaultMaxTokens:   OpenAIModels[GPT5_3Codex].DefaultMaxTokens,
+		CanReason:          OpenAIModels[GPT5_3Codex].CanReason,
+	},
+	OpenRouterXAIGrok4_1: {
+		ID:                 OpenRouterXAIGrok4_1,
+		Name:               "OpenRouter – Grok 4.1",
+		Provider:           ProviderOpenRouter,
+		APIModel:           "x-ai/grok-4.1",
+		CostPer1MIn:        XAIModels[XAIGrok4_1].CostPer1MIn,
+		CostPer1MInCached:  XAIModels[XAIGrok4_1].CostPer1MInCached,
+		CostPer1MOut:       XAIModels[XAIGrok4_1].CostPer1MOut,
+		CostPer1MOutCached: XAIModels[XAIGrok4_1].CostPer1MOutCached,
+		ContextWindow:      XAIModels[XAIGrok4_1].ContextWindow,
+		DefaultMaxTokens:   XAIModels[XAIGrok4_1].DefaultMaxTokens,
+		CanReason:          XAIModels[XAIGrok4_1].CanReason,
+	},
+	OpenRouterXAIGrok4_20: {
+		ID:                 OpenRouterXAIGrok4_20,
+		Name:               "OpenRouter – Grok 4.20",
+		Provider:           ProviderOpenRouter,
+		APIModel:           "x-ai/grok-4.20",
+		CostPer1MIn:        XAIModels[XAIGrok4_20].CostPer1MIn,
+		CostPer1MInCached:  XAIModels[XAIGrok4_20].CostPer1MInCached,
+		CostPer1MOut:       XAIModels[XAIGrok4_20].CostPer1MOut,
+		CostPer1MOutCached: XAIModels[XAIGrok4_20].CostPer1MOutCached,
+		ContextWindow:      XAIModels[XAIGrok4_20].ContextWindow,
+		DefaultMaxTokens:   XAIModels[XAIGrok4_20].DefaultMaxTokens,
+		CanReason:          XAIModels[XAIGrok4_20].CanReason,
+	},
+	OpenRouterMistralLarge3: {
+		ID:                 OpenRouterMistralLarge3,
+		Name:               "OpenRouter – Mistral Large 3",
+		Provider:           ProviderOpenRouter,
+		APIModel:           "mistralai/mistral-large-2411",
+		CostPer1MIn:        MistralModels[MistralLarge3].CostPer1MIn,
+		CostPer1MInCached:  MistralModels[MistralLarge3].CostPer1MInCached,
+		CostPer1MOut:       MistralModels[MistralLarge3].CostPer1MOut,
+		CostPer1MOutCached: MistralModels[MistralLarge3].CostPer1MOutCached,
+		ContextWindow:      MistralModels[MistralLarge3].ContextWindow,
+		DefaultMaxTokens:   MistralModels[MistralLarge3].DefaultMaxTokens,
 	},
 }
