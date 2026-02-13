@@ -273,8 +273,10 @@ Blu builds on the excellent work of:
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+Distributed under the **MIT License**. See `LICENSE` for more information.
 
----
+<p align="center">
+  Made by Garv Agnihotri
+</p>
 
 **Created by [Garv Agnihotri](https://github.com/Get-Blu)**
