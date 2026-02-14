@@ -119,7 +119,7 @@ func formatTokensAndCost(tokens, contextWindow int64, cost float64) string {
 func (m statusCmp) View() string {
 	t := theme.CurrentTheme()
 	modelID := config.Get().Agents[config.AgentCoder].Model
-	model := models.SupportedModels[modelID]
+	model := models.GetAllModels()[modelID]
 
 	// Initialize the help widget
 	status := getHelpWidget()
@@ -275,7 +275,7 @@ func (m statusCmp) model() string {
 	if !ok {
 		return "Unknown"
 	}
-	model := models.SupportedModels[coder.Model]
+	model := models.GetAllModels()[coder.Model]
 
 	return styles.Padded().
 		Background(t.Secondary()).

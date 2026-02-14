@@ -346,16 +346,18 @@ func (m *modelDialogCmp) setupModels() {
 }
 
 func GetSelectedModel(cfg *config.Config) models.Model {
-
 	agentCfg := cfg.Agents[config.AgentCoder]
 	selectedModelId := agentCfg.Model
-	return models.SupportedModels[selectedModelId]
+	
+	// Use GetAllModels() which includes both static and Catwalk models
+	return models.GetAllModels()[selectedModelId]
 }
 
 func getEnabledProviders(cfg *config.Config) []models.ModelProvider {
 	var providers []models.ModelProvider
 	for providerId, provider := range cfg.Providers {
-		if !provider.Disabled {
+		// Only include providers that are enabled AND have an API key
+		if !provider.Disabled && provider.APIKey != "" {
 			providers = append(providers, providerId)
 		}
 	}
@@ -398,7 +400,7 @@ func (m *modelDialogCmp) setupModelsForProvider(provider models.ModelProvider) {
 	m.scrollOffset = 0
 
 	// Try to select the current model if it belongs to this provider
-	if provider == models.SupportedModels[selectedModelId].Provider {
+	if provider == models.GetAllModels()[selectedModelId].Provider {
 		for i, model := range m.models {
 			if model.ID == selectedModelId {
 				m.selectedIdx = i
@@ -414,7 +416,11 @@ func (m *modelDialogCmp) setupModelsForProvider(provider models.ModelProvider) {
 
 func getModelsForProvider(provider models.ModelProvider) []models.Model {
 	var providerModels []models.Model
-	for _, model := range models.SupportedModels {
+	
+	// Use GetAllModels() which includes both static and Catwalk models
+	allModels := models.GetAllModels()
+	
+	for _, model := range allModels {
 		if model.Provider == provider {
 			providerModels = append(providerModels, model)
 		}
@@ -434,23 +440,36 @@ func getModelsForProvider(provider models.ModelProvider) []models.Model {
 }
 
 func (m *modelDialogCmp) setupProvidersOnly() {
-	// Get all available providers, even disabled ones for setup
+	// Get all available providers from both static and dynamic models
+	providerMap := make(map[models.ModelProvider]bool)
+	
+	// Add static providers
+	for _, model := range models.SupportedModels {
+		providerMap[model.Provider] = true
+	}
+	
+	// Add dynamic Catwalk providers
+	for _, model := range models.GetCatwalkModels() {
+		providerMap[model.Provider] = true
+	}
+
 	var providers []models.ModelProvider
-	for p := range models.ProviderPopularity {
+	for p := range providerMap {
 		providers = append(providers, p)
 	}
 
-	// Sort by popularity
+	// Sort by popularity, then alphabetically
 	slices.SortFunc(providers, func(a, b models.ModelProvider) int {
 		rA := models.ProviderPopularity[a]
 		rB := models.ProviderPopularity[b]
-		if rA == 0 {
-			rA = 999
+		
+		if rA == 0 { rA = 999 }
+		if rB == 0 { rB = 999 }
+		
+		if rA != rB {
+			return rA - rB
 		}
-		if rB == 0 {
-			rB = 999
-		}
-		return rA - rB
+		return strings.Compare(string(a), string(b))
 	})
 
 	m.availableProviders = providers

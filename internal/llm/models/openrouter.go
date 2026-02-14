@@ -29,11 +29,15 @@ const (
 	OpenRouterClaude3Opus    ModelID = "openrouter.claude-3-opus"
 	OpenRouterDeepSeekR1Free ModelID = "openrouter.deepseek-r1-free"
 	OpenRouterGemini3DeepThink ModelID = "openrouter.gemini-3-deep-think"
-	OpenRouterGPT5_2         ModelID = "openrouter.gpt-5.2"
-	OpenRouterGPT5_3Codex    ModelID = "openrouter.gpt-5.3-codex"
-	OpenRouterXAIGrok4_1     ModelID = "openrouter.grok-4.1"
-	OpenRouterXAIGrok4_20    ModelID = "openrouter.grok-4.20"
-	OpenRouterMistralLarge3  ModelID = "openrouter.mistral-large-3"
+	OpenRouterGPT5_2           ModelID = "openrouter.gpt-5.2"
+	OpenRouterGPT5_3Codex      ModelID = "openrouter.gpt-5.3-codex"
+	OpenRouterXAIGrok4_1       ModelID = "openrouter.grok-4.1"
+	OpenRouterXAIGrok4_20      ModelID = "openrouter.grok-4.20"
+	OpenRouterMistralLarge3    ModelID = "openrouter.mistral-large-3"
+	OpenRouterDeepSeekR1       ModelID = "openrouter.deepseek-r1"
+	OpenRouterDeepSeekV3       ModelID = "openrouter.deepseek-v3"
+	OpenRouterGeminiFlash2Free ModelID = "openrouter.gemini-2.0-flash-free"
+	OpenRouterMistral7BFree    ModelID = "openrouter.mistral-7b-free"
 )
 
 var OpenRouterModels = map[ModelID]Model{
@@ -335,17 +339,58 @@ var OpenRouterModels = map[ModelID]Model{
 		DefaultMaxTokens:   AnthropicModels[Claude3Opus].DefaultMaxTokens,
 	},
 
+	OpenRouterDeepSeekR1: {
+		ID:                 OpenRouterDeepSeekR1,
+		Name:               "OpenRouter – DeepSeek R1",
+		Provider:           ProviderOpenRouter,
+		APIModel:           "deepseek/deepseek-r1",
+		CostPer1MIn:        0.55,
+		CostPer1MOut:       2.19,
+		ContextWindow:      163_840,
+		DefaultMaxTokens:   8192,
+		CanReason:          true,
+	},
+	OpenRouterGeminiFlash2Free: {
+		ID:               OpenRouterGeminiFlash2Free,
+		Name:             "OpenRouter – Gemini 2.0 Flash Free",
+		Provider:         ProviderOpenRouter,
+		APIModel:         "google/gemini-2.0-flash-exp:free",
+		CostPer1MIn:      0,
+		CostPer1MOut:     0,
+		ContextWindow:    1_048_576,
+		DefaultMaxTokens: 8192,
+	},
+	OpenRouterMistral7BFree: {
+		ID:               OpenRouterMistral7BFree,
+		Name:             "OpenRouter – Mistral 7B Free",
+		Provider:         ProviderOpenRouter,
+		APIModel:         "mistralai/mistral-7b-instruct:free",
+		CostPer1MIn:      0,
+		CostPer1MOut:     0,
+		ContextWindow:    32768,
+		DefaultMaxTokens: 4096,
+	},
 	OpenRouterDeepSeekR1Free: {
 		ID:                 OpenRouterDeepSeekR1Free,
 		Name:               "OpenRouter – DeepSeek R1 Free",
 		Provider:           ProviderOpenRouter,
 		APIModel:           "deepseek/deepseek-r1:free",
 		CostPer1MIn:        0,
-		CostPer1MInCached:  0,
 		CostPer1MOut:       0,
-		CostPer1MOutCached: 0,
 		ContextWindow:      163_840,
 		DefaultMaxTokens:   10000,
+		CanReason:          true, // Fixed: R1 IS a reasoning model
+		DisableTools:       true,
+	},
+	OpenRouterDeepSeekV3: {
+		ID:                 OpenRouterDeepSeekV3,
+		Name:               "OpenRouter – DeepSeek V3",
+		Provider:           ProviderOpenRouter,
+		APIModel:           "deepseek/deepseek-chat",
+		CostPer1MIn:        0.14,
+		CostPer1MOut:       0.28,
+		ContextWindow:      128_000,
+		DefaultMaxTokens:   8192,
 	},
 	OpenRouterGemini3DeepThink: {
 		ID:                 OpenRouterGemini3DeepThink,

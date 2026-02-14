@@ -20,6 +20,7 @@ type Model struct {
 	DefaultMaxTokens    int64         `json:"default_max_tokens"`
 	CanReason           bool          `json:"can_reason"`
 	SupportsAttachments bool          `json:"supports_attachments"`
+	DisableTools        bool          `json:"disable_tools"`
 }
 
 // Model IDs
@@ -122,4 +123,11 @@ func init() {
 	maps.Copy(SupportedModels, CopilotModels)
 	maps.Copy(SupportedModels, DeepSeekModels)
 	maps.Copy(SupportedModels, MistralModels)
+	
+	// Fetch Catwalk models in background
+	// This will populate dynamic models without blocking startup
+	go func() {
+		_ = FetchCatwalkModels()
+	}()
 }
+

@@ -709,7 +709,7 @@ func createAgentProvider(agentName config.AgentName) (provider.Provider, error) 
 	if !ok {
 		return nil, fmt.Errorf("agent %s not found", agentName)
 	}
-	model, ok := models.SupportedModels[agentConfig.Model]
+	model, ok := models.GetAllModels()[agentConfig.Model]
 	if !ok {
 		return nil, fmt.Errorf("model %s not supported", agentConfig.Model)
 	}

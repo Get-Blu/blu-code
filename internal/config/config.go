@@ -477,7 +477,7 @@ func validateAgent(cfg *Config, name AgentName, agent Agent) error {
 	// TODO:	If a copilot model is specified, but model is not found,
 	// 		 	it might be new model. The https://api.githubcopilot.com/models
 	// 		 	endpoint should be queried to validate if the model is supported.
-	model, modelExists := models.SupportedModels[agent.Model]
+	model, modelExists := models.GetAllModels()[agent.Model]
 	if !modelExists {
 		logging.Warn("unsupported model configured, reverting to default",
 			"agent", name,
@@ -710,7 +710,7 @@ func setDefaultModelForAgent(agent AgentName) bool {
 		}
 
 		// Check if model supports reasoning
-		if modelInfo, ok := models.SupportedModels[model]; ok && modelInfo.CanReason {
+		if modelInfo, ok := models.GetAllModels()[model]; ok && modelInfo.CanReason {
 			reasoningEffort = "medium"
 		}
 
@@ -738,7 +738,7 @@ func setDefaultModelForAgent(agent AgentName) bool {
 		}
 
 		// Check if model supports reasoning
-		if modelInfo, ok := models.SupportedModels[model]; ok && modelInfo.CanReason {
+		if modelInfo, ok := models.GetAllModels()[model]; ok && modelInfo.CanReason {
 			reasoningEffort = "medium"
 		}
 
@@ -883,7 +883,7 @@ func UpdateAgentModel(agentName AgentName, modelID models.ModelID) error {
 
 	existingAgentCfg := cfg.Agents[agentName]
 
-	model, ok := models.SupportedModels[modelID]
+	model, ok := models.GetAllModels()[modelID]
 	if !ok {
 		return fmt.Errorf("model %s not supported", modelID)
 	}

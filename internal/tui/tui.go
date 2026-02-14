@@ -384,6 +384,16 @@ func (a *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case dialog.ProviderSelectedMsg:
 		a.showProviderDialog = false
+		
+		// Check if the provider already has an API key configured
+		cfg := config.Get()
+		if providerCfg, exists := cfg.Providers[msg.Provider]; exists && providerCfg.APIKey != "" {
+			// API key already exists, just show a message
+			providerName := strings.ToUpper(string(msg.Provider)[:1]) + string(msg.Provider[1:])
+			return a, util.ReportInfo(fmt.Sprintf("%s is already configured", providerName))
+		}
+		
+		// No API key exists, show the dialog to enter one
 		a.apiKeyDialog = dialog.NewAPIKeyDialogCmp(msg.Provider)
 		a.showAPIKeyDialog = true
 		return a, a.apiKeyDialog.Init()

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/openai/openai-go"
@@ -44,6 +45,21 @@ func newOpenAIClient(opts providerClientOptions) OpenAIClient {
 	}
 
 	openaiClientOptions := []option.RequestOption{}
+	
+	// Ensure OpenRouter specific headers are set if using OpenRouter
+	isOpenRouter := strings.Contains(openaiOpts.baseURL, "openrouter.ai")
+	if isOpenRouter {
+		if openaiOpts.extraHeaders == nil {
+			openaiOpts.extraHeaders = make(map[string]string)
+		}
+		if _, ok := openaiOpts.extraHeaders["HTTP-Referer"]; !ok {
+			openaiOpts.extraHeaders["HTTP-Referer"] = "https://github.com/Get-Blu/blu-code"
+		}
+		if _, ok := openaiOpts.extraHeaders["X-Title"]; !ok {
+			openaiOpts.extraHeaders["X-Title"] = "Blu"
+		}
+	}
+
 	if opts.apiKey != "" {
 		openaiClientOptions = append(openaiClientOptions, option.WithAPIKey(opts.apiKey))
 	}
@@ -64,6 +80,7 @@ func newOpenAIClient(opts providerClientOptions) OpenAIClient {
 		client:          client,
 	}
 }
+
 
 func (o *openaiClient) convertMessages(messages []message.Message) (openaiMessages []openai.ChatCompletionMessageParamUnion) {
 	// Add system message first
@@ -163,20 +180,31 @@ func (o *openaiClient) preparedParams(messages []openai.ChatCompletionMessagePar
 	params := openai.ChatCompletionNewParams{
 		Model:    openai.ChatModel(o.providerOptions.model.APIModel),
 		Messages: messages,
-		Tools:    tools,
+	}
+
+	// Only add tools if model doesn't explicitly disable them
+	if len(tools) > 0 && !o.providerOptions.model.DisableTools {
+		params.Tools = tools
 	}
 
 	if o.providerOptions.model.CanReason == true {
 		params.MaxCompletionTokens = openai.Int(o.providerOptions.maxTokens)
-		switch o.options.reasoningEffort {
-		case "low":
-			params.ReasoningEffort = shared.ReasoningEffortLow
-		case "medium":
-			params.ReasoningEffort = shared.ReasoningEffortMedium
-		case "high":
-			params.ReasoningEffort = shared.ReasoningEffortHigh
-		default:
-			params.ReasoningEffort = shared.ReasoningEffortMedium
+		
+		// Reasoning effort is only supported by OpenAI o1/o3 models
+		isOpenAIReasoningModel := strings.HasPrefix(string(o.providerOptions.model.ID), "openai.o") || 
+								  strings.HasPrefix(string(o.providerOptions.model.ID), "azure.o")
+								  
+		if isOpenAIReasoningModel {
+			switch o.options.reasoningEffort {
+			case "low":
+				params.ReasoningEffort = shared.ReasoningEffortLow
+			case "medium":
+				params.ReasoningEffort = shared.ReasoningEffortMedium
+			case "high":
+				params.ReasoningEffort = shared.ReasoningEffortHigh
+			default:
+				params.ReasoningEffort = shared.ReasoningEffortMedium
+			}
 		}
 	} else {
 		params.MaxTokens = openai.Int(o.providerOptions.maxTokens)
@@ -240,8 +268,12 @@ func (o *openaiClient) send(ctx context.Context, messages []message.Message, too
 
 func (o *openaiClient) stream(ctx context.Context, messages []message.Message, tools []tools.BaseTool) <-chan ProviderEvent {
 	params := o.preparedParams(o.convertMessages(messages), o.convertTools(tools))
-	params.StreamOptions = openai.ChatCompletionStreamOptionsParam{
-		IncludeUsage: openai.Bool(true),
+	
+	// OpenRouter and some other providers have issues with IncludeUsage in StreamOptions
+	if !strings.Contains(o.options.baseURL, "openrouter.ai") {
+		params.StreamOptions = openai.ChatCompletionStreamOptionsParam{
+			IncludeUsage: openai.Bool(true),
+		}
 	}
 
 	cfg := config.Get()
@@ -264,10 +296,12 @@ func (o *openaiClient) stream(ctx context.Context, messages []message.Message, t
 			acc := openai.ChatCompletionAccumulator{}
 			currentContent := ""
 			toolCalls := make([]message.ToolCall, 0)
+			chunkCount := 0
 
 			for openaiStream.Next() {
 				chunk := openaiStream.Current()
 				acc.AddChunk(chunk)
+				chunkCount++
 
 				for _, choice := range chunk.Choices {
 					if choice.Delta.Content != "" {
@@ -277,12 +311,34 @@ func (o *openaiClient) stream(ctx context.Context, messages []message.Message, t
 						}
 						currentContent += choice.Delta.Content
 					}
+					// Handle reasoning/thinking process for models like DeepSeek R1
+					// Note: ReasoningContent is not yet available in the official OpenAI Go SDK
+					/*
+					if choice.Delta.ReasoningContent != "" {
+						eventChan <- ProviderEvent{
+							Type:     EventThinkingDelta,
+							Thinking: choice.Delta.ReasoningContent,
+						}
+					}
+					*/
 				}
 			}
 
 			err := openaiStream.Err()
 			if err == nil || errors.Is(err, io.EOF) {
 				// Stream completed successfully
+				
+				// Safety check: ensure we have choices in the accumulator
+				if len(acc.ChatCompletion.Choices) == 0 {
+					logging.ErrorPersist("Stream completed but accumulator has no choices")
+					eventChan <- ProviderEvent{
+						Type: EventError,
+						Error: fmt.Errorf("no response received from provider (empty choices)"),
+					}
+					close(eventChan)
+					return
+				}
+				
 				finishReason := o.finishReason(string(acc.ChatCompletion.Choices[0].FinishReason))
 				if len(acc.ChatCompletion.Choices[0].Message.ToolCalls) > 0 {
 					toolCalls = append(toolCalls, o.toolCalls(acc.ChatCompletion)...)
@@ -337,11 +393,15 @@ func (o *openaiClient) stream(ctx context.Context, messages []message.Message, t
 func (o *openaiClient) shouldRetry(attempts int, err error) (bool, int64, error) {
 	var apierr *openai.Error
 	if !errors.As(err, &apierr) {
-		return false, 0, err
+		// Not an OpenAI error type - could be OpenRouter or network error
+		logging.Debug("Non-OpenAI error encountered", "error", err, "errorType", fmt.Sprintf("%T", err))
+		return false, 0, fmt.Errorf("provider error: %w", err)
 	}
 
+	logging.Debug("API error details", "statusCode", apierr.StatusCode, "message", apierr.Message, "type", apierr.Type)
+
 	if apierr.StatusCode != 429 && apierr.StatusCode != 500 {
-		return false, 0, err
+		return false, 0, fmt.Errorf("API error (status %d): %s", apierr.StatusCode, apierr.Message)
 	}
 
 	if attempts > maxRetries {
@@ -359,6 +419,7 @@ func (o *openaiClient) shouldRetry(attempts int, err error) (bool, int64, error)
 			retryMs = retryMs * 1000
 		}
 	}
+	logging.Debug("Retry scheduled", "retryMs", retryMs, "attempt", attempts)
 	return true, int64(retryMs), nil
 }
 
