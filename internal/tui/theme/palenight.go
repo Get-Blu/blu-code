@@ -93,7 +93,7 @@ func NewPalenightTheme() *PalenightTheme {
 	theme.SyntaxNumberColor = lipgloss.AdaptiveColor{Dark: pnYellow, Light: "#f57c00"}
 	theme.SyntaxTypeColor = lipgloss.AdaptiveColor{Dark: pnYellow, Light: "#f57c00"}
 	theme.SyntaxOperatorColor = lipgloss.AdaptiveColor{Dark: pnCyan, Light: "#0097a7"}
-	theme.SyntaxPunctuationColor = lipgloss.AdaptiveColor{Dark: pn Cyan, Light: "#0097a7"}
+	theme.SyntaxPunctuationColor = lipgloss.AdaptiveColor{Dark: pnCyan, Light: "#0097a7"}
 
 	return theme
 }
