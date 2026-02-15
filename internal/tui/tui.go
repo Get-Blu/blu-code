@@ -34,6 +34,7 @@ type keyMap struct {
 	Models        key.Binding
 	Providers     key.Binding
 	SwitchTheme   key.Binding
+	Docs          key.Binding
 }
 
 type startCompactSessionMsg struct{}
@@ -82,6 +83,10 @@ var keys = keyMap{
 	Providers: key.NewBinding(
 		key.WithKeys("ctrl+p"),
 		key.WithHelp("ctrl+p", "provider selection"),
+	),
+	Docs: key.NewBinding(
+		key.WithKeys("ctrl+d"),
+		key.WithHelp("ctrl+d", "documentation"),
 	),
 }
 
@@ -147,6 +152,9 @@ type appModel struct {
 	showMultiArgumentsDialog bool
 	multiArgumentsDialog     dialog.MultiArgumentsDialogCmp
 
+	showDocsDialog bool
+	docsDialog     dialog.DocsDialogCmp
+
 	isCompacting      bool
 	compactingMessage string
 }
@@ -175,6 +183,8 @@ func (a *appModel) Init() tea.Cmd {
 	cmd = a.themeDialog.Init()
 	cmds = append(cmds, cmd)
 	cmd = a.providerDialog.Init()
+	cmds = append(cmds, cmd)
+	cmd = a.docsDialog.Init()
 	cmds = append(cmds, cmd)
 
 	// Check if we should show the init dialog
@@ -358,6 +368,10 @@ func (a *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case dialog.CloseThemeDialogMsg:
 		a.showThemeDialog = false
+		return a, nil
+
+	case dialog.CloseDocsDialogMsg:
+		a.showDocsDialog = false
 		return a, nil
 
 	case dialog.ThemeChangedMsg:
@@ -610,6 +624,9 @@ func (a *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			a.showHelp = !a.showHelp
 			return a, nil
+		case key.Matches(msg, keys.Docs):
+			a.showDocsDialog = !a.showDocsDialog
+			return a, nil
 		case key.Matches(msg, helpEsc):
 			if a.app.CoderAgent.IsBusy() {
 				if a.showQuit {
@@ -729,8 +746,22 @@ func (a *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	s, _ := a.status.Update(msg)
 	a.status = s.(core.StatusCmp)
-	a.pages[a.currentPage], cmd = a.pages[a.currentPage].Update(msg)
 	cmds = append(cmds, cmd)
+
+	// Update help bindings to include the docs key
+	a.help.SetBindings([]key.Binding{
+		keys.Help,
+		keys.Docs,
+		keys.Quit,
+		keys.Logs,
+		keys.SwitchSession,
+		keys.Commands,
+		keys.Filepicker,
+		keys.Models,
+		keys.Providers,
+		keys.SwitchTheme,
+	})
+
 	return a, tea.Batch(cmds...)
 }
 
@@ -808,6 +839,21 @@ func (a *appModel) View() string {
 			true,
 		)
 
+	}
+	
+	if a.showDocsDialog {
+		overlay := a.docsDialog.View()
+		row := lipgloss.Height(appView) / 2
+		row -= lipgloss.Height(overlay) / 2
+		col := lipgloss.Width(appView) / 2
+		col -= lipgloss.Width(overlay) / 2
+		appView = layout.PlaceOverlay(
+			col,
+			row,
+			overlay,
+			appView,
+			true,
+		)
 	}
 
 	// Show compacting status overlay
@@ -1112,6 +1158,17 @@ If there are Cursor rules (in .cursor/rules/ or .cursorrules) or Copilot rules (
 	})
 
 	model.RegisterCommand(dialog.Command{
+		ID:          "docs",
+		Title:       "docs",
+		Description: "Show documentation links (opens documentation dialog)",
+		Handler: func(cmd dialog.Command) tea.Cmd {
+			return func() tea.Msg {
+				return keys.Docs
+			}
+		},
+	})
+
+	model.RegisterCommand(dialog.Command{
 		ID:          "help",
 		Title:       "help",
 		Description: "Show available commands and keyboard shortcuts",
@@ -1123,6 +1180,7 @@ If there are Cursor rules (in .cursor/rules/ or .cursorrules) or Copilot rules (
 			helpText.WriteString("  /compact    - Compact/summarize current session\n")
 			helpText.WriteString("  /model      - Change AI model\n")
 			helpText.WriteString("  /config     - Show current configuration\n")
+			helpText.WriteString("  /docs       - Show documentation links\n")
 			helpText.WriteString("  /help       - Show this help message\n\n")
 			
 			helpText.WriteString("  Keyboard Shortcuts:\n")
@@ -1134,6 +1192,7 @@ If there are Cursor rules (in .cursor/rules/ or .cursorrules) or Copilot rules (
 			helpText.WriteString("  Ctrl+L      - View logs\n")
 			helpText.WriteString("  Ctrl+H      - Toggle help\n")
 			helpText.WriteString("  Ctrl+N      - New session\n")
+			helpText.WriteString("  Ctrl+D      - Documentation\n")
 			helpText.WriteString("  Ctrl+C      - Quit\n\n")
 			
 			helpText.WriteString("  Configuration Files:\n")

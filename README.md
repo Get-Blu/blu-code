@@ -26,7 +26,7 @@ Blu is a Go-powered terminal UI that transforms your command line into an intell
 npm install -g @get-blu/blu-code
 ```
 
-**Via install script:**
+**Via raw script:**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Get-Blu/blu-code/main/install | bash
 ```
@@ -52,7 +52,7 @@ export ANTHROPIC_API_KEY="your-key-here"
 {
   "agents": {
     "coder": {
-      "model": "claude-sonnet-4-5-20250929",
+      "model": "claude-3.7-sonnet",
       "maxTokens": 8192
     }
   },
@@ -97,6 +97,27 @@ Switch between Claude, GPT, Gemini, or any OpenAI-compatible endpoint. Use diffe
 2. **Let AI explore**: Blu can read files, search your codebase, and understand context
 3. **Review changes**: See proposed file modifications in the sidebar
 4. **Apply or reject**: Accept changes you want, skip the rest
+
+## Documentation
+
+Comprehensive documentation is available in the `docs/` directory:
+
+- [Introduction](docs/introduction.md)
+- [Getting Started](docs/getting-started.md)
+- [Configuration](docs/configuration.md)
+- [Key Bindings](docs/key-bindings.md)
+- [Architecture](docs/architecture/overview.md)
+
+### Detailed Features
+- [AI Chat](docs/features/ai-chat.md)
+- [File Operations](docs/features/file-operations.md)
+- [LSP Intelligence](docs/features/lsp-and-intelligence.md)
+- [MCP Servers](docs/features/mcp-servers.md)
+- [Session Management](docs/features/session-management.md)
+
+### Guides
+- [Best Practices](docs/guides/best-practices.md)
+- [Troubleshooting](docs/guides/troubleshooting.md)
 
 ## Keyboard Shortcuts
 
@@ -207,26 +228,23 @@ Place `.blu.json` in your home directory (`~/.blu.json`) or project root:
 ### Supported Models
 
 **Anthropic (Claude):**
-- `claude-4.6-opus` - Claude 4.6 Opus (flagship capability)
-- `claude-3.7-sonnet` - Claude 3.7 Sonnet (recommended for coding)
+- `claude-3.7-sonnet` - Recommended for coding (supports reasoning)
+- `claude-3.5-sonnet` - Fast and highly capable
+- `claude-4.6-opus` - Next-gen flagship capability
 
 **OpenAI:**
-- `gpt-5.3-codex` - GPT-5.3 Codex (latest agentic flagship)
-- `gpt-5.2` - GPT-5.2 (multimodal, fast)
-- `o3-ultra` - O3 Ultra (advanced reasoning)
+- `o3-ultra` - Latest reasoning flagship
+- `gpt-5.3-codex` - Specialized for agentic coding
+- `gpt-4o` - Balanced speed and intelligence
 
 **Google:**
-- `gemini-3-deep-think` - Gemini 3 Deep Think (advanced scientific/engineering)
-- `gemini-3.0-pro` - Gemini 3.0 Pro (multimodal reasoning)
-- `gemini-2.0-flash` - Gemini 2.0 Flash (high speed intelligence)
+- `gemini-3-deep-think` - Advanced reasoning and engineering
+- `gemini-2.0-flash` - High-speed intelligence
+- `gemini-1.5-pro` - Large context window
 
 **DeepSeek:**
-- `deepseek-v3.2` - DeepSeek V3.2
-- `deepseek-r1` - DeepSeek R1 (reasoning model)
-
-**xAI:**
-- `grok-4.1` - Grok 4.1
-- `grok-4.20` - Grok 4.20 (Enterprise)
+- `deepseek-v3` - High performance open-weights model
+- `deepseek-r1` - Reasoning focused model
 
 ### Environment Variables
 

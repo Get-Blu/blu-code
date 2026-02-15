@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    name: Build
+    name: Build and Release
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

@@ -40,6 +40,40 @@ const url = `https://github.com/Get-Blu/blu-code/releases/download/v${version}/$
 
 console.log(`Downloading ${url} ...`);
 
+const download = (url, dest) => {
+    return new Promise((resolve, reject) => {
+        const file = fs.createWriteStream(dest);
+        https.get(url, (response) => {
+            if (response.statusCode === 302 || response.statusCode === 301) {
+                file.close();
+                fs.unlinkSync(dest); // Clean up partial file before redirect
+                return resolve(download(response.headers.location, dest));
+            }
+
+            if (response.statusCode !== 200) {
+                file.close();
+                fs.unlinkSync(dest);
+                return reject(new Error(`Failed to download binary: HTTP ${response.statusCode}`));
+            }
+
+            response.pipe(file);
+            file.on('finish', () => {
+                file.close();
+                const stats = fs.statSync(dest);
+                if (stats.size === 0) {
+                    fs.unlinkSync(dest);
+                    return reject(new Error('Downloaded binary is empty'));
+                }
+                resolve();
+            });
+        }).on('error', (err) => {
+            file.close();
+            if (fs.existsSync(dest)) fs.unlinkSync(dest);
+            reject(err);
+        });
+    });
+};
+
 const destDir = path.join(__dirname, '..', 'bin');
 if (!fs.existsSync(destDir)) {
     fs.mkdirSync(destDir, { recursive: true });
@@ -47,40 +81,14 @@ if (!fs.existsSync(destDir)) {
 
 const destFile = path.join(destDir, `blu${ext}`);
 
-const file = fs.createWriteStream(destFile);
-
-https.get(url, (response) => {
-    if (response.statusCode === 302 || response.statusCode === 301) {
-        // Handle redirect
-        https.get(response.headers.location, (response) => {
-            if (response.statusCode !== 200) {
-                console.error(`Failed to download binary: ${response.statusCode}`);
-                process.exit(1);
-            }
-            response.pipe(file);
-            file.on('finish', () => {
-                file.close();
-                console.log(`Download complete: ${destFile}`);
-                if (platform !== 'win32') {
-                    fs.chmodSync(destFile, 0o755);
-                }
-            });
-        });
-    } else if (response.statusCode !== 200) {
-        console.error(`Failed to download binary: ${response.statusCode}`);
+download(url, destFile)
+    .then(() => {
+        console.log(`Download complete: ${destFile}`);
+        if (platform !== 'win32') {
+            fs.chmodSync(destFile, 0o755);
+        }
+    })
+    .catch((err) => {
+        console.error(`Error: ${err.message}`);
         process.exit(1);
-    } else {
-        response.pipe(file);
-        file.on('finish', () => {
-            file.close();
-            console.log(`Download complete: ${destFile}`);
-            if (platform !== 'win32') {
-                fs.chmodSync(destFile, 0o755);
-            }
-        });
-    }
-}).on('error', (err) => {
-    fs.unlink(destFile, () => { }); // Delete the file async. (But we don't check result)
-    console.error(`Error downloading binary: ${err.message}`);
-    process.exit(1);
-});
+    });

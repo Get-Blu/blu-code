@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
-APP=blu
+APP_NAME="blu-code"
+APP_EXEC="blu"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -11,30 +12,20 @@ NC='\033[0m' # No Color
 requested_version=${VERSION:-}
 
 os=$(uname -s | tr '[:upper:]' '[:lower:]')
-if [[ "$os" == "darwin" ]]; then
-    os="mac"
-fi
+# Keep 'darwin' instead of 'mac' to match Goreleaser/CI conventions
 arch=$(uname -m)
 
-if [[ "$arch" == "aarch64" ]]; then
+if [[ "$arch" == "x86_64" ]]; then
+  arch="amd64"
+elif [[ "$arch" == "aarch64" || "$arch" == "arm64" ]]; then
   arch="arm64"
 fi
 
-filename="$APP-$os-$arch.tar.gz"
-
-
-case "$filename" in
-    *"-linux-"*)
-        [[ "$arch" == "x86_64" || "$arch" == "arm64" || "$arch" == "i386" ]] || exit 1
-    ;;
-    *"-mac-"*)
-        [[ "$arch" == "x86_64" || "$arch" == "arm64" ]] || exit 1
-    ;;
-    *)
-        echo "${RED}Unsupported OS/Arch: $os/$arch${NC}"
-        exit 1
-    ;;
-esac
+filename="${APP_NAME}-${os}-${arch}"
+if [[ "$os" == "mingw"* || "$os" == "cygwin"* || "$os" == "win"* ]]; then
+    os="windows"
+    filename="${filename}.exe"
+fi
 
 INSTALL_DIR=$HOME/.blu/bin
 mkdir -p "$INSTALL_DIR"
@@ -86,10 +77,18 @@ check_version() {
 }
 
 download_and_install() {
-    print_message info "Downloading ${ORANGE}blu ${GREEN}version: ${YELLOW}$specific_version ${GREEN}..."
+    print_message info "Downloading ${ORANGE}${APP_EXEC} ${GREEN}version: ${YELLOW}$specific_version ${GREEN}..."
     mkdir -p blutmp && cd blutmp
-    curl -# -L $url | tar xz
-    mv blu $INSTALL_DIR
+    curl -# -L -O $url
+    
+    # If it's a binary with .exe, rename it correctly
+    if [[ -f "${filename}" ]]; then
+        chmod +x "${filename}"
+        mv "${filename}" "$INSTALL_DIR/${APP_EXEC}"
+    elif [[ -f "${filename}.exe" ]]; then
+        mv "${filename}.exe" "$INSTALL_DIR/${APP_EXEC}.exe"
+    fi
+    
     cd .. && rm -rf blutmp 
 }
 
