@@ -1,0 +1,26 @@
+{
+  "name": "@get-blu/blu-code",
+  "version": "1.0.1",
+  "description": "Terminal-based AI assistant for software development",
+  "bin": {
+    "blu": "./bin/cli.js"
+  },
+  "scripts": {
+    "postinstall": "node scripts/install-npm.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Get-Blu/blu-code.git"
+  },
+  "author": "Get-Blu",
+  "license": "MIT",
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "files": [
+    "bin",
+    "scripts/install-npm.js",
+    "README.md",
+    "LICENSE"
+  ]
+}

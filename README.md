@@ -21,6 +21,11 @@ Blu is a Go-powered terminal UI that transforms your command line into an intell
 
 ### Installation
 
+**Via npm (recommended):**
+```bash
+npm install -g @get-blu/blu-code
+```
+
 **Via install script:**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Get-Blu/blu-code/main/install | bash
