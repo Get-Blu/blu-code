@@ -16,7 +16,7 @@ var (
 	catwalkProviders  map[ModelProvider]bool
 	catwalkOnce       sync.Once
 	catwalkErr        error
-	catwalkURL        = "https://catwalk.charm.land"
+	catwalkURL        = "https://catwalk.charm.sh"
 )
 
 // FetchCatwalkModels fetches models from the Catwalk API

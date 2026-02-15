@@ -27,7 +27,6 @@ const (
 	OpenRouterClaude37Sonnet ModelID = "openrouter.claude-3.7-sonnet"
 	OpenRouterClaude35Haiku  ModelID = "openrouter.claude-3.5-haiku"
 	OpenRouterClaude3Opus    ModelID = "openrouter.claude-3-opus"
-	OpenRouterDeepSeekR1Free ModelID = "openrouter.deepseek-r1-free"
 	OpenRouterGemini3DeepThink ModelID = "openrouter.gemini-3-deep-think"
 	OpenRouterGPT5_2           ModelID = "openrouter.gpt-5.2"
 	OpenRouterGPT5_3Codex      ModelID = "openrouter.gpt-5.3-codex"
@@ -369,18 +368,6 @@ var OpenRouterModels = map[ModelID]Model{
 		CostPer1MOut:     0,
 		ContextWindow:    32768,
 		DefaultMaxTokens: 4096,
-	},
-	OpenRouterDeepSeekR1Free: {
-		ID:                 OpenRouterDeepSeekR1Free,
-		Name:               "OpenRouter – DeepSeek R1 Free",
-		Provider:           ProviderOpenRouter,
-		APIModel:           "deepseek/deepseek-r1:free",
-		CostPer1MIn:        0,
-		CostPer1MOut:       0,
-		ContextWindow:      163_840,
-		DefaultMaxTokens:   10000,
-		CanReason:          true, // Fixed: R1 IS a reasoning model
-		DisableTools:       true,
 	},
 	OpenRouterDeepSeekV3: {
 		ID:                 OpenRouterDeepSeekV3,
