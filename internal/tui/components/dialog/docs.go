@@ -38,36 +38,57 @@ func (d *docsDialogCmp) View() string {
 	t := theme.CurrentTheme()
 	baseStyle := styles.BaseStyle()
 
-	headerStyle := baseStyle.Copy().Bold(true).Foreground(t.Primary())
-	linkStyle := baseStyle.Copy().Foreground(t.MarkdownLink())
-	mutedStyle := baseStyle.Copy().Foreground(t.TextMuted())
-	labelStyle := baseStyle.Copy()
+	// Initial render of content to determine max width
+	header := styles.Bold().Foreground(t.Primary()).Render("Documentation")
+	repoLabel := "GitHub Repository:"
+	repoLink := styles.Regular().Foreground(t.MarkdownLink()).Render("https://github.com/Get-Blu/blu-code")
+	localLabel := "Local Documentation Folder:"
+	localLink := styles.Regular().Foreground(t.MarkdownLink()).Render("./docs/")
+	filesLabel := "Key Documentation Files:"
+	file1 := " - Introduction: " + styles.Regular().Foreground(t.MarkdownLink()).Render("docs/introduction.md")
+	file2 := " - Getting Started: " + styles.Regular().Foreground(t.MarkdownLink()).Render("docs/getting-started.md")
+	file3 := " - Configuration: " + styles.Regular().Foreground(t.MarkdownLink()).Render("docs/configuration.md")
+	file4 := " - Best Practices: " + styles.Regular().Foreground(t.MarkdownLink()).Render("docs/guides/best-practices.md")
+	footer := styles.Regular().Foreground(t.TextMuted()).Render("Press esc or q to close")
 
-	content := lipgloss.JoinVertical(
-		lipgloss.Left,
-		headerStyle.Render("Documentation"),
-		labelStyle.Render(""),
-		labelStyle.Render("GitHub Repository:"),
-		linkStyle.Render("https://github.com/Get-Blu/blu-code"),
-		labelStyle.Render(""),
-		labelStyle.Render("Local Documentation Folder:"),
-		linkStyle.Render("./docs/"),
-		labelStyle.Render(""),
-		labelStyle.Render("Key Documentation Files:"),
-		labelStyle.Render(" - Introduction: "+linkStyle.Render("docs/introduction.md")),
-		labelStyle.Render(" - Getting Started: "+linkStyle.Render("docs/getting-started.md")),
-		labelStyle.Render(" - Configuration: "+linkStyle.Render("docs/configuration.md")),
-		labelStyle.Render(" - Best Practices: "+linkStyle.Render("docs/guides/best-practices.md")),
-		labelStyle.Render(""),
-		mutedStyle.Render("Press esc or q to close"),
-	)
+	lines := []string{
+		header,
+		"",
+		repoLabel,
+		repoLink,
+		"",
+		localLabel,
+		localLink,
+		"",
+		filesLabel,
+		file1,
+		file2,
+		file3,
+		file4,
+		"",
+		footer,
+	}
 
-	// Calculate the actual content width to ensure the background fills the entire box
-	contentWidth := lipgloss.Width(content)
+	// Calculate max width
+	maxWidth := 0
+	for _, l := range lines {
+		w := lipgloss.Width(l)
+		if w > maxWidth {
+			maxWidth = w
+		}
+	}
+
+	// Render each line with the base style and fixed width to ensure solid background
+	var styledLines []string
+	itemStyle := baseStyle.Copy().Width(maxWidth)
+	for _, l := range lines {
+		styledLines = append(styledLines, itemStyle.Render(l))
+	}
+
+	content := lipgloss.JoinVertical(lipgloss.Left, styledLines...)
 
 	return baseStyle.
 		Padding(1, 2).
-		Width(contentWidth + 4). // Add padding to the width
 		Border(lipgloss.RoundedBorder()).
 		BorderBackground(t.Background()).
 		BorderForeground(t.TextMuted()).

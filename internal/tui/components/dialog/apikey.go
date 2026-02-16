@@ -70,30 +70,38 @@ func (m APIKeyDialogCmp) View() string {
 	t := theme.CurrentTheme()
 	baseStyle := styles.BaseStyle()
 
-	title := baseStyle.Copy().
-		Foreground(t.Primary()).
-		Bold(true).
-		Padding(0, 0, 1).
-		Render("Configure API Key")
+	titleStr := styles.Bold().Foreground(t.Primary()).Render("Configure API Key")
+	providerStr := styles.Regular().Foreground(t.TextMuted()).Render("Provider: " + string(m.provider))
+	inputStr := m.input.View()
 
-	providerLabel := baseStyle.Copy().
-		Foreground(t.TextMuted()).
-		Padding(0, 0, 1).
-		Render("Provider: " + string(m.provider))
+	lines := []string{
+		titleStr,
+		"",
+		providerStr,
+		"",
+		inputStr,
+	}
 
-	content := lipgloss.JoinVertical(
-		lipgloss.Left,
-		title,
-		providerLabel,
-		m.input.View(),
-	)
+	// Calculate max width
+	maxWidth := 0
+	for _, l := range lines {
+		w := lipgloss.Width(l)
+		if w > maxWidth {
+			maxWidth = w
+		}
+	}
 
-	// Calculate content width to ensure background fills
-	contentWidth := lipgloss.Width(content)
+	// Render each line with fixed width to ensure background fills
+	var styledLines []string
+	itemStyle := baseStyle.Copy().Width(maxWidth)
+	for _, l := range lines {
+		styledLines = append(styledLines, itemStyle.Render(l))
+	}
+
+	content := lipgloss.JoinVertical(lipgloss.Left, styledLines...)
 
 	return baseStyle.
 		Padding(1, 2).
-		Width(contentWidth + 4).
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(t.BorderNormal()).
 		Render(content)
