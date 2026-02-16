@@ -6,6 +6,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/Get-Blu/blu-code/internal/llm/models"
+	"github.com/Get-Blu/blu-code/internal/tui/styles"
 	"github.com/Get-Blu/blu-code/internal/tui/theme"
 	"github.com/Get-Blu/blu-code/internal/tui/util"
 )
