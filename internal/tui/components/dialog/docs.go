@@ -38,30 +38,36 @@ func (d *docsDialogCmp) View() string {
 	t := theme.CurrentTheme()
 	baseStyle := styles.BaseStyle()
 
-	headerStyle := styles.Bold().Foreground(t.Primary())
-	linkStyle := styles.Regular().Foreground(t.MarkdownLink())
-	mutedStyle := baseStyle.Foreground(t.TextMuted())
+	headerStyle := baseStyle.Copy().Bold(true).Foreground(t.Primary())
+	linkStyle := baseStyle.Copy().Foreground(t.MarkdownLink())
+	mutedStyle := baseStyle.Copy().Foreground(t.TextMuted())
+	labelStyle := baseStyle.Copy()
 
 	content := lipgloss.JoinVertical(
 		lipgloss.Left,
 		headerStyle.Render("Documentation"),
-		"",
-		"GitHub Repository: ",
+		labelStyle.Render(""),
+		labelStyle.Render("GitHub Repository:"),
 		linkStyle.Render("https://github.com/Get-Blu/blu-code"),
-		"",
-		"Local Documentation Folder: ",
+		labelStyle.Render(""),
+		labelStyle.Render("Local Documentation Folder:"),
 		linkStyle.Render("./docs/"),
-		"",
-		"Key Documentation Files:",
-		" - Introduction: "+linkStyle.Render("docs/introduction.md"),
-		" - Getting Started: "+linkStyle.Render("docs/getting-started.md"),
-		" - Configuration: "+linkStyle.Render("docs/configuration.md"),
-		" - Best Practices: "+linkStyle.Render("docs/guides/best-practices.md"),
-		"",
+		labelStyle.Render(""),
+		labelStyle.Render("Key Documentation Files:"),
+		labelStyle.Render(" - Introduction: "+linkStyle.Render("docs/introduction.md")),
+		labelStyle.Render(" - Getting Started: "+linkStyle.Render("docs/getting-started.md")),
+		labelStyle.Render(" - Configuration: "+linkStyle.Render("docs/configuration.md")),
+		labelStyle.Render(" - Best Practices: "+linkStyle.Render("docs/guides/best-practices.md")),
+		labelStyle.Render(""),
 		mutedStyle.Render("Press esc or q to close"),
 	)
 
-	return baseStyle.Padding(1, 2).
+	// Calculate the actual content width to ensure the background fills the entire box
+	contentWidth := lipgloss.Width(content)
+
+	return baseStyle.
+		Padding(1, 2).
+		Width(contentWidth + 4). // Add padding to the width
 		Border(lipgloss.RoundedBorder()).
 		BorderBackground(t.Background()).
 		BorderForeground(t.TextMuted()).

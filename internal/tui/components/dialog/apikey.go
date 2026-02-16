@@ -67,14 +67,15 @@ func (m APIKeyDialogCmp) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m APIKeyDialogCmp) View() string {
 	t := theme.CurrentTheme()
+	baseStyle := styles.BaseStyle()
 
-	title := lipgloss.NewStyle().
+	title := baseStyle.Copy().
 		Foreground(t.Primary()).
 		Bold(true).
 		Padding(0, 0, 1).
 		Render("Configure API Key")
 
-	providerLabel := lipgloss.NewStyle().
+	providerLabel := baseStyle.Copy().
 		Foreground(t.TextMuted()).
 		Padding(0, 0, 1).
 		Render("Provider: " + string(m.provider))
@@ -86,8 +87,12 @@ func (m APIKeyDialogCmp) View() string {
 		m.input.View(),
 	)
 
-	return lipgloss.NewStyle().
+	// Calculate content width to ensure background fills
+	contentWidth := lipgloss.Width(content)
+
+	return baseStyle.
 		Padding(1, 2).
+		Width(contentWidth + 4).
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(t.BorderNormal()).
 		Render(content)
