@@ -744,6 +744,15 @@ func (a *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	if a.showDocsDialog {
+		d, docsCmd := a.docsDialog.Update(msg)
+		a.docsDialog = d.(dialog.DocsDialogCmp)
+		cmds = append(cmds, docsCmd)
+		if _, ok := msg.(tea.KeyMsg); ok {
+			return a, tea.Batch(cmds...)
+		}
+	}
+
 	s, _ := a.status.Update(msg)
 	a.status = s.(core.StatusCmp)
 	cmds = append(cmds, cmd)
@@ -1082,6 +1091,7 @@ func New(app *app.App) tea.Model {
 		},
 		filepicker:     dialog.NewFilepickerCmp(app),
 		providerDialog: dialog.NewProviderDialogCmp(),
+		docsDialog:     dialog.NewDocsDialogCmp(),
 	}
 
 	model.RegisterCommand(dialog.Command{
