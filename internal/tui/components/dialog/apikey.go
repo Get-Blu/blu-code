@@ -32,8 +32,9 @@ func NewAPIKeyDialogCmp(provider models.ModelProvider) APIKeyDialogCmp {
 	ti.EchoCharacter = '•'
 	ti.Focus()
 	ti.Width = 40
-	ti.PromptStyle = ti.PromptStyle.Foreground(t.Primary())
-	ti.TextStyle = ti.TextStyle.Foreground(t.Text())
+	ti.PromptStyle = ti.PromptStyle.Foreground(t.Primary()).Background(t.Background())
+	ti.TextStyle = ti.TextStyle.Foreground(t.Text()).Background(t.Background())
+	ti.PlaceholderStyle = ti.PlaceholderStyle.Foreground(t.TextMuted()).Background(t.Background())
 
 	return APIKeyDialogCmp{
 		input:    ti,
@@ -103,7 +104,8 @@ func (m APIKeyDialogCmp) View() string {
 	return baseStyle.
 		Padding(1, 2).
 		Border(lipgloss.RoundedBorder()).
-		BorderForeground(t.BorderNormal()).
+		BorderBackground(t.Background()).
+		BorderForeground(t.TextMuted()).
 		Render(content)
 }
 
