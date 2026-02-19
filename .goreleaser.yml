@@ -1,7 +1,6 @@
 version: 2
 project_name: blu
 
-
 builds:
   - env:
       - CGO_ENABLED=0
@@ -20,7 +19,8 @@ builds:
 archives:
   # Archive #1 – compressed tarballs/zips for human download
   - id: archive
-    format: tar.gz
+    formats:
+      - tar.gz
     name_template: >-
       {{ .ProjectName }}-
       {{- if eq .Os "darwin" }}mac-
@@ -32,11 +32,13 @@ archives:
       {{- if .Arm }}v{{ .Arm }}{{ end }}
     format_overrides:
       - goos: windows
-        format: zip
+        formats:
+          - zip
 
   # Archive #2 – bare binaries so install scripts can download directly
   - id: binary
-    format: binary
+    formats:
+      - binary
     name_template: >-
       {{ .ProjectName }}-
       {{- if eq .Os "darwin" }}darwin-
@@ -50,7 +52,7 @@ checksum:
   name_template: "checksums.txt"
 
 snapshot:
-  name_template: "{{ .Version }}-{{ .Timestamp }}"
+  version_template: "{{ .Version }}-{{ .Timestamp }}"
 
 # AUR publishing — uncomment once AUR_KEY secret and AUR package are configured
 # aurs:
@@ -70,7 +72,9 @@ snapshot:
 #       install -Dm755 ./blu "${pkgdir}/usr/bin/blu"
 
 brews:
-  - repository:
+  - ids:
+      - archive
+    repository:
       owner: Get-Blu
       name: homebrew-tap
     description: "Terminal-based AI assistant for software development"
@@ -80,7 +84,9 @@ brews:
       bin.install "blu"
 
 nfpms:
-  - maintainer: Garv Agnihotri <garvagnihotri22@gmail.com>
+  - ids:
+      - archive
+    maintainer: Garv Agnihotri <garvagnihotri22@gmail.com>
     description: Terminal-based AI assistant for software development
     homepage: "https://github.com/Get-Blu/blu-code"
     license: MIT
