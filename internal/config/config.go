@@ -871,7 +871,11 @@ func Get() *Config {
 // WorkingDirectory returns the current working directory from the configuration.
 func WorkingDirectory() string {
 	if cfg == nil {
-		panic("config not loaded")
+		wd, err := os.Getwd()
+		if err != nil {
+			return "."
+		}
+		return wd
 	}
 	return cfg.WorkingDir
 }
