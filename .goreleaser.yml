@@ -2,7 +2,8 @@ version: 2
 project_name: blu
 
 builds:
-  - env:
+  - id: blu
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
@@ -17,8 +18,10 @@ builds:
     binary: blu
 
 archives:
-  # Archive #1 – compressed tarballs/zips for human download
-  - id: archive
+  # Archive #1 – Primary tarball/zip (Standard release)
+  - id: default
+    builds:
+      - blu
     formats:
       - tar.gz
     name_template: >-
@@ -35,8 +38,10 @@ archives:
         formats:
           - zip
 
-  # Archive #2 – bare binaries so install scripts can download directly
+  # Archive #2 – Bare binaries (Required for install scripts)
   - id: binary
+    builds:
+      - blu
     formats:
       - binary
     name_template: >-
@@ -54,38 +59,22 @@ checksum:
 snapshot:
   version_template: "{{ .Version }}-{{ .Timestamp }}"
 
-# AUR publishing — uncomment once AUR_KEY secret and AUR package are configured
-# aurs:
-#   - name: blu-bin
-#     homepage: "https://github.com/Get-Blu/blu-code"
-#     description: "Terminal-based AI assistant for software development"
-#     maintainers:
-#       - "Garv Agnihotri <garvagnihotri22@gmail.com>"
-#     license: "MIT"
-#     private_key: "{{ .Env.AUR_KEY }}"
-#     git_url: "ssh://aur@aur.archlinux.org/blu-bin.git"
-#     provides:
-#       - blu
-#     conflicts:
-#       - blu
-#     package: |-
-#       install -Dm755 ./blu "${pkgdir}/usr/bin/blu"
-
 brews:
   - ids:
-      - archive
+      - default
     repository:
       owner: Get-Blu
       name: homebrew-tap
     description: "Terminal-based AI assistant for software development"
     homepage: "https://github.com/Get-Blu/blu-code"
     license: "MIT"
+    directory: Formula
     install: |
       bin.install "blu"
 
 nfpms:
-  - ids:
-      - archive
+  - builds:
+      - blu
     maintainer: Garv Agnihotri <garvagnihotri22@gmail.com>
     description: Terminal-based AI assistant for software development
     homepage: "https://github.com/Get-Blu/blu-code"
