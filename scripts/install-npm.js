@@ -1,13 +1,26 @@
+#!/usr/bin/env node
+'use strict';
+
 const fs = require('fs');
 const https = require('https');
 const path = require('path');
 const os = require('os');
-const { version } = require('../package.json');
+const { execSync } = require('child_process');
+
+// Try to get version from package.json
+let version;
+try {
+    const pkg = require('../package.json');
+    version = pkg.version;
+} catch (e) {
+    console.error('Could not read package.json:', e.message);
+    process.exit(1);
+}
 
 const platform = process.platform;
 const arch = process.arch;
 
-// Map OS
+// Map Node OS to GOOS
 let goos = '';
 let ext = '';
 if (platform === 'win32') {
@@ -18,11 +31,13 @@ if (platform === 'win32') {
 } else if (platform === 'linux') {
     goos = 'linux';
 } else {
-    console.error(`Unsupported OS: ${platform}`);
+    console.error(`Unsupported platform: ${platform}`);
+    console.error('Please download the binary manually from:');
+    console.error(`  https://github.com/Get-Blu/blu-code/releases`);
     process.exit(1);
 }
 
-// Map Architecture
+// Map Node arch to GOARCH
 let goarch = '';
 if (arch === 'x64') {
     goarch = 'amd64';
@@ -30,49 +45,14 @@ if (arch === 'x64') {
     goarch = 'arm64';
 } else {
     console.error(`Unsupported architecture: ${arch}`);
+    console.error('Please download the binary manually from:');
+    console.error(`  https://github.com/Get-Blu/blu-code/releases`);
     process.exit(1);
 }
 
-// Construct URL
-// Artifact names from GitHub Release: blu-code-linux-amd64, blu-code-windows-amd64.exe
-const binName = `blu-code-${goos}-${goarch}${ext}`;
-const url = `https://github.com/Get-Blu/blu-code/releases/download/v${version}/${binName}`;
-
-console.log(`Downloading ${url} ...`);
-
-const download = (url, dest) => {
-    return new Promise((resolve, reject) => {
-        const file = fs.createWriteStream(dest);
-        https.get(url, (response) => {
-            if (response.statusCode === 302 || response.statusCode === 301) {
-                file.close();
-                fs.unlinkSync(dest); // Clean up partial file before redirect
-                return resolve(download(response.headers.location, dest));
-            }
-
-            if (response.statusCode !== 200) {
-                file.close();
-                fs.unlinkSync(dest);
-                return reject(new Error(`Failed to download binary: HTTP ${response.statusCode}`));
-            }
-
-            response.pipe(file);
-            file.on('finish', () => {
-                file.close();
-                const stats = fs.statSync(dest);
-                if (stats.size === 0) {
-                    fs.unlinkSync(dest);
-                    return reject(new Error('Downloaded binary is empty'));
-                }
-                resolve();
-            });
-        }).on('error', (err) => {
-            file.close();
-            if (fs.existsSync(dest)) fs.unlinkSync(dest);
-            reject(err);
-        });
-    });
-};
+// Binary name matches GoReleaser output: blu-linux-amd64, blu-windows-amd64.exe, etc.
+const binName = `blu-${goos}-${goarch}${ext}`;
+const downloadUrl = `https://github.com/Get-Blu/blu-code/releases/download/v${version}/${binName}`;
 
 const destDir = path.join(__dirname, '..', 'bin');
 if (!fs.existsSync(destDir)) {
@@ -81,14 +61,69 @@ if (!fs.existsSync(destDir)) {
 
 const destFile = path.join(destDir, `blu${ext}`);
 
-download(url, destFile)
+console.log(`\nDownloading Blu CLI v${version} for ${goos}/${goarch}...`);
+console.log(`URL: ${downloadUrl}\n`);
+
+/**
+ * Downloads a URL to a local file, following redirects.
+ */
+function download(url, dest) {
+    return new Promise((resolve, reject) => {
+        const file = fs.createWriteStream(dest);
+
+        function get(currentUrl) {
+            https.get(currentUrl, (response) => {
+                // Follow redirects (GitHub releases do a 302 -> S3)
+                if (response.statusCode === 301 || response.statusCode === 302) {
+                    file.close();
+                    if (fs.existsSync(dest)) fs.unlinkSync(dest);
+                    const newFile = fs.createWriteStream(dest);
+                    file.destroy();
+                    return get(response.headers.location);
+                }
+
+                if (response.statusCode !== 200) {
+                    file.destroy();
+                    if (fs.existsSync(dest)) fs.unlinkSync(dest);
+                    return reject(
+                        new Error(
+                            `HTTP ${response.statusCode} — binary not found.\n` +
+                            `Make sure release v${version} exists at:\n` +
+                            `  https://github.com/Get-Blu/blu-code/releases/tag/v${version}`
+                        )
+                    );
+                }
+
+                response.pipe(fs.createWriteStream(dest));
+                response.on('end', () => {
+                    const stats = fs.statSync(dest);
+                    if (stats.size === 0) {
+                        fs.unlinkSync(dest);
+                        return reject(new Error('Downloaded binary is empty — the release asset may be missing.'));
+                    }
+                    resolve();
+                });
+                response.on('error', reject);
+            }).on('error', reject);
+        }
+
+        get(url);
+    });
+}
+
+download(downloadUrl, destFile)
     .then(() => {
-        console.log(`Download complete: ${destFile}`);
+        // Make executable on Unix
         if (platform !== 'win32') {
             fs.chmodSync(destFile, 0o755);
         }
+        console.log(`✅  Blu CLI installed to: ${destFile}`);
+        console.log('    Run "blu --version" to verify the installation.\n');
     })
     .catch((err) => {
-        console.error(`Error: ${err.message}`);
+        console.error(`\n❌  Installation failed: ${err.message}\n`);
+        console.error('Manual install options:');
+        console.error('  • curl/wget: https://github.com/Get-Blu/blu-code/releases');
+        console.error(`  • Homebrew (macOS/Linux): brew install Get-Blu/tap/blu`);
         process.exit(1);
     });

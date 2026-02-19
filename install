@@ -12,8 +12,15 @@ NC='\033[0m' # No Color
 requested_version=${VERSION:-}
 
 os=$(uname -s | tr '[:upper:]' '[:lower:]')
-# Keep 'darwin' instead of 'mac' to match Goreleaser/CI conventions
 arch=$(uname -m)
+
+if [[ "$os" == "darwin" ]]; then
+    os="darwin"
+elif [[ "$os" == "linux" ]]; then
+    os="linux"
+elif [[ "$os" == "mingw"* || "$os" == "cygwin"* || "$os" == "win"* ]]; then
+    os="windows"
+fi
 
 if [[ "$arch" == "x86_64" ]]; then
   arch="amd64"
@@ -22,8 +29,7 @@ elif [[ "$arch" == "aarch64" || "$arch" == "arm64" ]]; then
 fi
 
 filename="${APP_NAME}-${os}-${arch}"
-if [[ "$os" == "mingw"* || "$os" == "cygwin"* || "$os" == "win"* ]]; then
-    os="windows"
+if [[ "$os" == "windows" ]]; then
     filename="${filename}.exe"
 fi
 
@@ -31,17 +37,14 @@ INSTALL_DIR=$HOME/.blu/bin
 mkdir -p "$INSTALL_DIR"
 
 if [ -z "$requested_version" ]; then
+    latest_release_json=$(curl -s https://api.github.com/repos/Get-Blu/blu-code/releases/latest)
+    specific_version=$(echo "$latest_release_json" | grep -oP '"tag_name": "\K[^"]+' | sed 's/^v//')
     url="https://github.com/Get-Blu/blu-code/releases/latest/download/$filename"
-    specific_version=$(curl -s https://api.github.com/repos/Get-Blu/blu-code/releases/latest | awk -F'"' '/"tag_name": "/ {gsub(/^v/, "", $4); print $4}')
-
-    if [[ $? -ne 0 ]]; then
-        echo "${RED}Failed to fetch version information${NC}"
-        exit 1
-    fi
 else
     url="https://github.com/Get-Blu/blu-code/releases/download/v${requested_version}/$filename"
     specific_version=$requested_version
 fi
+
 
 print_message() {
     local level=$1

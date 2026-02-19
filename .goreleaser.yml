@@ -1,7 +1,9 @@
 version: 2
 project_name: blu
+
 before:
   hooks:
+
 builds:
   - env:
       - CGO_ENABLED=0
@@ -15,47 +17,74 @@ builds:
     ldflags:
       - -s -w -X github.com/Get-Blu/blu-code/internal/version.Version={{.Version}}
     main: ./main.go
+    binary: blu
 
 archives:
-  - format: tar.gz
+  # Archive #1 – compressed tarballs/zips for human download
+  - id: archive
+    format: tar.gz
     name_template: >-
-      blu-
+      {{ .ProjectName }}-
       {{- if eq .Os "darwin" }}mac-
       {{- else if eq .Os "windows" }}windows-
       {{- else if eq .Os "linux" }}linux-{{end}}
       {{- if eq .Arch "amd64" }}x86_64
-      {{- else if eq .Arch "#86" }}i386
+      {{- else if eq .Arch "arm64" }}arm64
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
     format_overrides:
       - goos: windows
         format: zip
+
+  # Archive #2 – bare binaries so install scripts can download directly
+  - id: binary
+    format: binary
+    name_template: >-
+      {{ .ProjectName }}-
+      {{- if eq .Os "darwin" }}darwin-
+      {{- else if eq .Os "windows" }}windows-
+      {{- else if eq .Os "linux" }}linux-{{end}}
+      {{- if eq .Arch "amd64" }}amd64
+      {{- else if eq .Arch "arm64" }}arm64
+      {{- else }}{{ .Arch }}{{ end }}
+
 checksum:
   name_template: "checksums.txt"
+
 snapshot:
   name_template: "{{ .Version }}-{{ .Timestamp }}"
+
 aurs:
-  - name: blu-code
+  - name: blu-bin
     homepage: "https://github.com/Get-Blu/blu-code"
     description: "Terminal-based AI assistant for software development"
     maintainers:
       - "Garv Agnihotri <garvagnihotri22@gmail.com>"
     license: "MIT"
     private_key: "{{ .Env.AUR_KEY }}"
-    git_url: "ssh://aur@aur.archlinux.org/blu-code-bin.git"
+    git_url: "ssh://aur@aur.archlinux.org/blu-bin.git"
     provides:
       - blu
     conflicts:
       - blu
     package: |-
       install -Dm755 ./blu "${pkgdir}/usr/bin/blu"
+
 brews:
   - repository:
       owner: Get-Blu
       name: homebrew-tap
+    description: "Terminal-based AI assistant for software development"
+    homepage: "https://github.com/Get-Blu/blu-code"
+    license: "MIT"
+    install: |
+      bin.install "blu"
+
 nfpms:
-  - maintainer: Garv Agnihotri
+  - maintainer: Garv Agnihotri <garvagnihotri22@gmail.com>
     description: Terminal-based AI assistant for software development
+    homepage: "https://github.com/Get-Blu/blu-code"
+    license: MIT
     formats:
       - deb
       - rpm

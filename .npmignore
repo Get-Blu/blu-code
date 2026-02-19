@@ -1,0 +1,28 @@
+# Go source
+*.go
+go.mod
+go.sum
+main.go
+internal/
+cmd/
+
+# Build artifacts
+dist/
+bin/blu
+bin/blu.exe
+
+# Dev / project config
+.goreleaser.yml
+.github/
+.git/
+.gitignore
+docs/
+scripts/*.sh
+scripts/release
+scripts/script
+install
+install.ps1
+sqlc.yaml
+blu-schema.json
+.blu/
+.blu.json
