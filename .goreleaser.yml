@@ -59,18 +59,18 @@ checksum:
 snapshot:
   version_template: "{{ .Version }}-{{ .Timestamp }}"
 
-brews:
-  - ids:
-      - default
-    repository:
-      owner: Get-Blu
-      name: homebrew-tap
-    description: "Terminal-based AI assistant for software development"
-    homepage: "https://github.com/Get-Blu/blu-code"
-    license: "MIT"
-    directory: Formula
-    install: |
-      bin.install "blu"
+# brews:
+#   - ids:
+#       - default
+#     repository:
+#       owner: Get-Blu
+#       name: homebrew-tap
+#     description: "Terminal-based AI assistant for software development"
+#     homepage: "https://github.com/Get-Blu/blu-code"
+#     license: "MIT"
+#     directory: Formula
+#     install: |
+#       bin.install "blu"
 
 nfpms:
   - builds:
