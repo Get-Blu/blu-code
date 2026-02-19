@@ -65,53 +65,62 @@ console.log(`\nDownloading Blu CLI v${version} for ${goos}/${goarch}...`);
 console.log(`URL: ${downloadUrl}\n`);
 
 /**
- * Downloads a URL to a local file, following redirects.
+ * Follows redirects and returns the final URL.
  */
-function download(url, dest) {
+function resolveRedirect(url, maxRedirects = 10) {
     return new Promise((resolve, reject) => {
-        const file = fs.createWriteStream(dest);
-
-        function get(currentUrl) {
-            https.get(currentUrl, (response) => {
-                // Follow redirects (GitHub releases do a 302 -> S3)
-                if (response.statusCode === 301 || response.statusCode === 302) {
-                    file.close();
-                    if (fs.existsSync(dest)) fs.unlinkSync(dest);
-                    const newFile = fs.createWriteStream(dest);
-                    file.destroy();
-                    return get(response.headers.location);
-                }
-
-                if (response.statusCode !== 200) {
-                    file.destroy();
-                    if (fs.existsSync(dest)) fs.unlinkSync(dest);
-                    return reject(
-                        new Error(
-                            `HTTP ${response.statusCode} — binary not found.\n` +
-                            `Make sure release v${version} exists at:\n` +
-                            `  https://github.com/Get-Blu/blu-code/releases/tag/v${version}`
-                        )
-                    );
-                }
-
-                response.pipe(fs.createWriteStream(dest));
-                response.on('end', () => {
-                    const stats = fs.statSync(dest);
-                    if (stats.size === 0) {
-                        fs.unlinkSync(dest);
-                        return reject(new Error('Downloaded binary is empty — the release asset may be missing.'));
-                    }
-                    resolve();
-                });
-                response.on('error', reject);
-            }).on('error', reject);
-        }
-
-        get(url);
+        if (maxRedirects === 0) return reject(new Error('Too many redirects'));
+        https.get(url, (res) => {
+            res.resume(); // Drain the response body
+            if (res.statusCode === 301 || res.statusCode === 302) {
+                return resolve(resolveRedirect(res.headers.location, maxRedirects - 1));
+            }
+            if (res.statusCode !== 200) {
+                return reject(
+                    new Error(
+                        `HTTP ${res.statusCode} — binary not found.\n` +
+                        `Make sure release v${version} exists at:\n` +
+                        `  https://github.com/Get-Blu/blu-code/releases/tag/v${version}`
+                    )
+                );
+            }
+            resolve(url);
+        }).on('error', reject);
     });
 }
 
-download(downloadUrl, destFile)
+/**
+ * Downloads a URL to a local file (no redirects — call resolveRedirect first).
+ */
+function downloadDirect(url, dest) {
+    return new Promise((resolve, reject) => {
+        const file = fs.createWriteStream(dest);
+        https.get(url, (res) => {
+            res.pipe(file);
+            file.on('finish', () => {
+                file.close();
+                const stats = fs.statSync(dest);
+                if (stats.size === 0) {
+                    fs.unlinkSync(dest);
+                    return reject(new Error('Downloaded binary is empty — the release asset may be missing.'));
+                }
+                resolve();
+            });
+        }).on('error', (err) => {
+            file.close();
+            if (fs.existsSync(dest)) fs.unlinkSync(dest);
+            reject(err);
+        });
+        file.on('error', (err) => {
+            if (fs.existsSync(dest)) fs.unlinkSync(dest);
+            reject(err);
+        });
+    });
+}
+
+
+resolveRedirect(downloadUrl)
+    .then((finalUrl) => downloadDirect(finalUrl, destFile))
     .then(() => {
         // Make executable on Unix
         if (platform !== 'win32') {
@@ -123,7 +132,8 @@ download(downloadUrl, destFile)
     .catch((err) => {
         console.error(`\n❌  Installation failed: ${err.message}\n`);
         console.error('Manual install options:');
-        console.error('  • curl/wget: https://github.com/Get-Blu/blu-code/releases');
+        console.error('  • Download from: https://github.com/Get-Blu/blu-code/releases');
         console.error(`  • Homebrew (macOS/Linux): brew install Get-Blu/tap/blu`);
         process.exit(1);
     });
+
