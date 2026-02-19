@@ -18,7 +18,6 @@ builds:
     binary: blu
 
 archives:
-  # Archive #1 – Primary tarball/zip (Standard release)
   - id: default
     builds:
       - blu
@@ -38,7 +37,6 @@ archives:
         formats:
           - zip
 
-  # Archive #2 – Bare binaries (Required for install scripts)
   - id: binary
     builds:
       - blu
@@ -59,18 +57,13 @@ checksum:
 snapshot:
   version_template: "{{ .Version }}-{{ .Timestamp }}"
 
-# brews:
-#   - ids:
-#       - default
-#     repository:
-#       owner: Get-Blu
-#       name: homebrew-tap
-#     description: "Terminal-based AI assistant for software development"
-#     homepage: "https://github.com/Get-Blu/blu-code"
-#     license: "MIT"
-#     directory: Formula
-#     install: |
-#       bin.install "blu"
+# This is the key fix: Allow GoReleaser to overwrite existing releases/assets
+release:
+  github:
+    owner: Get-Blu
+    name: blu-code
+  replace: true
+  make_latest: true
 
 nfpms:
   - builds:
