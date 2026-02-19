@@ -57,12 +57,12 @@ checksum:
 snapshot:
   version_template: "{{ .Version }}-{{ .Timestamp }}"
 
-# This is the key fix: Allow GoReleaser to overwrite existing releases/assets
+# Correct GoReleaser v2 syntax for overwriting existing releases
 release:
   github:
     owner: Get-Blu
     name: blu-code
-  replace: true
+  mode: replace
   make_latest: true
 
 nfpms:
