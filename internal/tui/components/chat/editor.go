@@ -108,9 +108,7 @@ func (m *editorCmp) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.textarea.SetValue(modifiedValue)
 		return m, nil
 	case SessionSelectedMsg:
-		if msg.ID != m.session.ID {
-			m.session = msg
-		}
+		m.session = msg
 		return m, nil
 	case dialog.AttachmentAddedMsg:
 		if len(m.attachments) >= maxAttachments {
@@ -169,6 +167,22 @@ func (m *editorCmp) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *editorCmp) View() string {
 	t := theme.CurrentTheme()
 
+	// Mode indicator style
+	modeStyle := lipgloss.NewStyle().
+		Padding(0, 1).
+		Bold(true).
+		MarginRight(1)
+
+	modeText := "[ PLAN ]"
+	if m.session.Mode == session.ModeAct {
+		modeStyle = modeStyle.Background(lipgloss.Color("#FF4444")).Foreground(lipgloss.Color("#FFFFFF"))
+		modeText = "[ ACT ]"
+	} else {
+		modeStyle = modeStyle.Background(lipgloss.Color("#4444FF")).Foreground(lipgloss.Color("#FFFFFF"))
+		modeText = "[ PLAN ]"
+	}
+	modeIndicator := modeStyle.Render(modeText)
+
 	// Style the prompt with theme colors
 	style := lipgloss.NewStyle().
 		Padding(0, 0, 0, 1).
@@ -176,12 +190,12 @@ func (m *editorCmp) View() string {
 		Foreground(t.Primary())
 
 	if len(m.attachments) == 0 {
-		return lipgloss.JoinHorizontal(lipgloss.Top, style.Render(">"), m.textarea.View())
+		return lipgloss.JoinHorizontal(lipgloss.Top, modeIndicator, style.Render(">"), m.textarea.View())
 	}
 	m.textarea.SetHeight(m.height - 1)
 	return lipgloss.JoinVertical(lipgloss.Top,
 		m.attachmentsContent(),
-		lipgloss.JoinHorizontal(lipgloss.Top, style.Render(">"),
+		lipgloss.JoinHorizontal(lipgloss.Top, modeIndicator, style.Render(">"),
 			m.textarea.View()),
 	)
 }

@@ -47,6 +47,7 @@ cd blu-code
 go build -o blu
 ```
 
+
 ### Setup
 
 1. Set your API key(s):
@@ -313,12 +314,9 @@ Contributions are welcome! Please feel free to submit issues or pull requests.
 
 ## Credits
 
-Blu builds on the excellent work of:
-
-- **[OpenCode](https://github.com/opencode-ai/opencode)** - The foundation Blu is built upon
-- **[@adamdottv](https://github.com/adamdottv)** - Original OpenCode design and architecture
-- **[@isaacphi](https://github.com/isaacphi)** - LSP integration via `mcp-language-server`
-- **[Bubble Tea](https://github.com/charmbracelet/bubbletea)** - Excellent TUI framework
+- **[Bubble Tea](https://github.com/charmbracelet/bubbletea)** - Excellent TUI framework for Go
+- **[Charm](https://charm.sh/)** - The incredible ecosystem for terminal applications
+- **[@isaacphi](https://github.com/isaacphi)** - LSP integration and intelligence contributions
 
 ## License
 

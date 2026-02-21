@@ -9,6 +9,13 @@ import (
 	"github.com/Get-Blu/blu-code/internal/pubsub"
 )
 
+type SessionMode string
+
+const (
+	ModePlan SessionMode = "plan"
+	ModeAct  SessionMode = "act"
+)
+
 type Session struct {
 	ID               string
 	ParentSessionID  string
@@ -20,6 +27,7 @@ type Session struct {
 	Cost             float64
 	CreatedAt        int64
 	UpdatedAt        int64
+	Mode             SessionMode
 }
 
 type Service interface {
@@ -144,6 +152,7 @@ func (s service) fromDBItem(item db.Session) Session {
 		Cost:             item.Cost,
 		CreatedAt:        item.CreatedAt,
 		UpdatedAt:        item.UpdatedAt,
+		Mode:             ModePlan,
 	}
 }
 

@@ -38,6 +38,7 @@ type ChatKeyMap struct {
 	ShowCompletionDialog key.Binding
 	NewSession           key.Binding
 	Cancel               key.Binding
+	ToggleMode           key.Binding
 }
 
 var keyMap = ChatKeyMap{
@@ -52,6 +53,10 @@ var keyMap = ChatKeyMap{
 	Cancel: key.NewBinding(
 		key.WithKeys("esc"),
 		key.WithHelp("esc", "cancel"),
+	),
+	ToggleMode: key.NewBinding(
+		key.WithKeys("tab"),
+		key.WithHelp("tab", "toggle mode"),
 	),
 }
 
@@ -130,6 +135,24 @@ func (p *chatPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				// This allows users to interrupt long-running operations
 				p.app.CoderAgent.Cancel(p.session.ID)
 				return p, nil
+			}
+		case key.Matches(msg, keyMap.ToggleMode):
+			if !p.showCompletionDialog {
+				if p.session.Mode == session.ModePlan {
+					p.session.Mode = session.ModeAct
+				} else {
+					p.session.Mode = session.ModePlan
+				}
+
+				modeName := "PLAN"
+				if p.session.Mode == session.ModeAct {
+					modeName = "ACT"
+				}
+
+				return p, tea.Batch(
+					util.ReportInfo("Switched to "+modeName+" mode"),
+					util.CmdHandler(chat.SessionSelectedMsg(p.session)),
+				)
 			}
 		}
 	}

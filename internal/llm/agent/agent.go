@@ -321,6 +321,23 @@ func (a *agent) createUserMessage(ctx context.Context, sessionID, content string
 
 func (a *agent) streamAndHandleEvents(ctx context.Context, sessionID string, msgHistory []message.Message) (message.Message, *message.Message, error) {
 	ctx = context.WithValue(ctx, tools.SessionIDContextKey, sessionID)
+
+	sess, err := a.sessions.Get(ctx, sessionID)
+	if err == nil {
+		modeInstruction := ""
+		if sess.Mode == session.ModePlan {
+			modeInstruction = "You are in PLAN MODE. Focus on analysis. Do not attempt to edit files."
+		} else if sess.Mode == session.ModeAct {
+			modeInstruction = "You are in ACT MODE. You can now execute the changes we discussed."
+		}
+		if modeInstruction != "" {
+			msgHistory = append([]message.Message{{
+				Role:  message.System,
+				Parts: []message.ContentPart{message.TextContent{Text: modeInstruction}},
+			}}, msgHistory...)
+		}
+	}
+
 	eventChan := a.provider.StreamResponse(ctx, msgHistory, a.tools)
 
 	assistantMsg, err := a.messages.Create(ctx, sessionID, message.CreateMessageParams{
@@ -387,6 +404,26 @@ func (a *agent) streamAndHandleEvents(ctx context.Context, sessionID string, msg
 				}
 				continue
 			}
+			// Check if the tool is allowed in Plan Mode
+			if sess.Mode == session.ModePlan {
+				restrictedTools := []string{"bash", "edit", "patch", "write"}
+				isRestricted := false
+				for _, rt := range restrictedTools {
+					if tool.Info().Name == rt {
+						isRestricted = true
+						break
+					}
+				}
+				if isRestricted {
+					toolResults[i] = message.ToolResult{
+						ToolCallID: toolCall.ID,
+						Content:    "Action forbidden in Plan Mode. Please stay in exploration/planning.",
+						IsError:    true,
+					}
+					continue
+				}
+			}
+
 			toolResult, toolErr := tool.Run(ctx, tools.ToolCall{
 				ID:    toolCall.ID,
 				Name:  toolCall.Name,
