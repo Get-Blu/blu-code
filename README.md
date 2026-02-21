@@ -5,6 +5,10 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/go-1.21+-00ADD8.svg)](https://go.dev/)
 
+<p align="center">
+  <img src="assets/blu-code-main.png" alt="Blu-Code" width="100%">
+</p>
+
 ## Overview
 
 Blu is a Go-powered terminal UI that transforms your command line into an intelligent development environment. It connects to leading AI models and provides them with powerful tools to read, analyze, and modify your codebase - all from an elegant TUI built with [Bubble Tea](https://github.com/charmbracelet/bubbletea).
@@ -26,9 +30,14 @@ Blu is a Go-powered terminal UI that transforms your command line into an intell
 npm install -g @get-blu/blu-code
 ```
 
-**Via raw script:**
+**Via Shell script (macOS/Linux):**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Get-Blu/blu-code/main/install | bash
+```
+
+**Via PowerShell (Windows):**
+```powershell
+iwr https://raw.githubusercontent.com/Get-Blu/blu-code/main/install.ps1 | iex
 ```
 
 **From source:**
@@ -36,7 +45,6 @@ curl -fsSL https://raw.githubusercontent.com/Get-Blu/blu-code/main/install | bas
 git clone https://github.com/Get-Blu/blu-code.git
 cd blu-code
 go build -o blu
-blu
 ```
 
 ### Setup
