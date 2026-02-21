@@ -6,7 +6,7 @@
 [![Go Version](https://img.shields.io/badge/go-1.21+-00ADD8.svg)](https://go.dev/)
 
 <p align="center">
-  <img src="assets/blu-code.png" alt="Blu-Code" width="100%">
+  <img src="assets/blu-code-main.png" alt="Blu-Code" width="100%">
 </p>
 
 ## Overview
