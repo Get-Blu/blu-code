@@ -5,6 +5,10 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/go-1.21+-00ADD8.svg)](https://go.dev/)
 
+<p align="center">
+  <img src="assets/blu-logo.png" alt="Blu" width="100%">
+</p>
+
 ## Overview
 
 Blu is a Go-powered terminal UI that transforms your command line into an intelligent development environment. It connects to leading AI models and provides them with powerful tools to read, analyze, and modify your codebase - all from an elegant TUI built with [Bubble Tea](https://github.com/charmbracelet/bubbletea).
@@ -305,12 +309,12 @@ Contributions are welcome! Please feel free to submit issues or pull requests.
 
 ## Credits
 
-Blu builds on the excellent work of:
+Blu builds on the excellent work of many open-source projects:
 
-- **[OpenCode](https://github.com/opencode-ai/opencode)** - The foundation Blu is built upon
-- **[@adamdottv](https://github.com/adamdottv)** - Original OpenCode design and architecture
-- **[@isaacphi](https://github.com/isaacphi)** - LSP integration via `mcp-language-server`
 - **[Bubble Tea](https://github.com/charmbracelet/bubbletea)** - Excellent TUI framework
+- **[Lip Gloss](https://github.com/charmbracelet/lipgloss)** - Style definitions for TUI
+- **[Go-GitHub](https://github.com/google/go-github)** - GitHub API client
+- **[Sqlite3](https://github.com/mattn/go-sqlite3)** - Local persistence
 
 ## License
 

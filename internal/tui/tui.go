@@ -20,8 +20,10 @@ import (
 	"github.com/Get-Blu/blu-code/internal/tui/components/dialog"
 	"github.com/Get-Blu/blu-code/internal/tui/layout"
 	"github.com/Get-Blu/blu-code/internal/tui/page"
+	"github.com/Get-Blu/blu-code/internal/tui/styles"
 	"github.com/Get-Blu/blu-code/internal/tui/theme"
 	"github.com/Get-Blu/blu-code/internal/tui/util"
+	"github.com/Get-Blu/blu-code/internal/version"
 )
 
 type keyMap struct {
@@ -493,8 +495,9 @@ func (a *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			// Execute the command with arguments
 			return a, util.CmdHandler(dialog.CommandRunCustomMsg{
-				Content: content,
-				Args:    msg.Args,
+				CommandID: msg.CommandID,
+				Content:   content,
+				Args:      msg.Args,
 			})
 		}
 		return a, nil
@@ -585,11 +588,9 @@ func (a *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return a, a.themeDialog.Init()
 			}
 			return a, nil
-		case key.Matches(msg, returnKey) || key.Matches(msg):
-			if msg.String() == quitKey {
-				if a.currentPage == page.LogsPage {
-					return a, a.moveToPage(page.ChatPage)
-				}
+		case key.Matches(msg, returnKey) || (a.currentPage == page.LogsPage && key.Matches(msg, logsKeyReturnKey)):
+			if a.currentPage == page.LogsPage {
+				return a, a.moveToPage(page.ChatPage)
 			} else if !a.filepicker.IsCWDFocused() {
 				if a.showQuit {
 					a.showQuit = !a.showQuit
@@ -611,9 +612,6 @@ func (a *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					a.showFilepicker = false
 					a.filepicker.ToggleFilepicker(a.showFilepicker)
 					return a, nil
-				}
-				if a.currentPage == page.LogsPage {
-					return a, a.moveToPage(page.ChatPage)
 				}
 			}
 		case key.Matches(msg, keys.Logs):
@@ -753,9 +751,14 @@ func (a *appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
+	// Pass all other messages to the current page
+	var pageCmd tea.Cmd
+	a.pages[a.currentPage], pageCmd = a.pages[a.currentPage].Update(msg)
+	cmds = append(cmds, pageCmd)
+
 	s, _ := a.status.Update(msg)
 	a.status = s.(core.StatusCmp)
-	cmds = append(cmds, cmd)
+	cmds = append(cmds, cmd) // cmd from previous assignments if any
 
 	// Update help bindings to include the docs key
 	a.help.SetBindings([]key.Binding{
@@ -1130,7 +1133,9 @@ If there are Cursor rules (in .cursor/rules/ or .cursorrules) or Copilot rules (
 		Title:       "model",
 		Description: "Change the AI model (opens model selection dialog)",
 		Handler: func(cmd dialog.Command) tea.Cmd {
-			return util.CmdHandler(dialog.ModelSelectedMsg{})
+			return func() tea.Msg {
+				return keys.Models
+			}
 		},
 	})
 
@@ -1179,6 +1184,107 @@ If there are Cursor rules (in .cursor/rules/ or .cursorrules) or Copilot rules (
 	})
 
 	model.RegisterCommand(dialog.Command{
+		ID:          "about",
+		Title:       "about",
+		Description: "Show information about Blu",
+		Handler: func(cmd dialog.Command) tea.Cmd {
+			about := fmt.Sprintf("%s Blu v%s\n\nAn intelligent TUI for AI-assisted coding.\nCreated by Garv Agnihotri\nhttps://github.com/Get-Blu/blu-code", styles.BluIcon, version.Version)
+			return util.ReportInfo(about)
+		},
+	})
+
+	model.RegisterCommand(dialog.Command{
+		ID:          "version",
+		Title:       "version",
+		Description: "Show version number",
+		Handler: func(cmd dialog.Command) tea.Cmd {
+			return util.ReportInfo(fmt.Sprintf("Blu v%s", version.Version))
+		},
+	})
+
+	model.RegisterCommand(dialog.Command{
+		ID:          "clear",
+		Title:       "clear",
+		Description: "Clear the current chat view",
+		Handler: func(cmd dialog.Command) tea.Cmd {
+			return util.CmdHandler(chat.SessionClearedMsg{})
+		},
+	})
+
+	model.RegisterCommand(dialog.Command{
+		ID:          "sessions",
+		Title:       "sessions",
+		Description: "Switch between chat sessions",
+		Handler: func(cmd dialog.Command) tea.Cmd {
+			return func() tea.Msg {
+				return keys.SwitchSession
+			}
+		},
+	})
+
+	model.RegisterCommand(dialog.Command{
+		ID:          "new",
+		Title:       "new",
+		Description: "Start a new chat session",
+		Handler: func(cmd dialog.Command) tea.Cmd {
+			return func() tea.Msg {
+				return tea.KeyMsg{Type: tea.KeyCtrlN}
+			}
+		},
+	})
+
+	model.RegisterCommand(dialog.Command{
+		ID:          "logs",
+		Title:       "logs",
+		Description: "View application logs",
+		Handler: func(cmd dialog.Command) tea.Cmd {
+			return func() tea.Msg {
+				return keys.Logs
+			}
+		},
+	})
+
+	model.RegisterCommand(dialog.Command{
+		ID:          "quit",
+		Title:       "quit",
+		Description: "Exit the application",
+		Handler: func(cmd dialog.Command) tea.Cmd {
+			return func() tea.Msg {
+				return keys.Quit
+			}
+		},
+	})
+
+	model.RegisterCommand(dialog.Command{
+		ID:          "compact-toggle",
+		Title:       "compact-toggle",
+		Description: "Toggle automatic session compaction",
+		Handler: func(cmd dialog.Command) tea.Cmd {
+			config.Get().AutoCompact = !config.Get().AutoCompact
+			status := "enabled"
+			if !config.Get().AutoCompact {
+				status = "disabled"
+			}
+			return util.ReportInfo(fmt.Sprintf("Auto-compaction %s", status))
+		},
+	})
+
+	model.RegisterCommand(dialog.Command{
+		ID:          "export",
+		Title:       "export",
+		Description: "Export the current session to a markdown file",
+		Handler: func(cmd dialog.Command) tea.Cmd {
+			return func() tea.Msg {
+				return dialog.ShowMultiArgumentsDialogMsg{
+					CommandID: "export",
+					Content:   "Exporting session...",
+					ArgNames:  []string{"filename"},
+				}
+			}
+		},
+	})
+
+	model.RegisterCommand(dialog.Command{
 		ID:          "help",
 		Title:       "help",
 		Description: "Show available commands and keyboard shortcuts",
@@ -1188,10 +1294,16 @@ If there are Cursor rules (in .cursor/rules/ or .cursorrules) or Copilot rules (
 			helpText.WriteString(" Built-in Commands:\n")
 			helpText.WriteString("  /init       - Initialize project (create Blu.md)\n")
 			helpText.WriteString("  /compact    - Compact/summarize current session\n")
+			helpText.WriteString("  /new        - Start a new session\n")
+			helpText.WriteString("  /sessions   - Switch sessions\n")
 			helpText.WriteString("  /model      - Change AI model\n")
 			helpText.WriteString("  /config     - Show current configuration\n")
 			helpText.WriteString("  /docs       - Show documentation links\n")
-			helpText.WriteString("  /help       - Show this help message\n\n")
+			helpText.WriteString("  /clear      - Clear current chat view\n")
+			helpText.WriteString("  /logs       - View application logs\n")
+			helpText.WriteString("  /about      - Show information about Blu\n")
+			helpText.WriteString("  /help       - Show this help message\n")
+			helpText.WriteString("  /quit       - Exit the application\n\n")
 			
 			helpText.WriteString("  Keyboard Shortcuts:\n")
 			helpText.WriteString("  Ctrl+K      - Open commands dialog\n")

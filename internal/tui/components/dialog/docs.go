@@ -48,7 +48,11 @@ func (d *docsDialogCmp) View() string {
 	file1 := " - Introduction: " + styles.Regular().Foreground(t.MarkdownLink()).Render("docs/introduction.md")
 	file2 := " - Getting Started: " + styles.Regular().Foreground(t.MarkdownLink()).Render("docs/getting-started.md")
 	file3 := " - Configuration: " + styles.Regular().Foreground(t.MarkdownLink()).Render("docs/configuration.md")
-	file4 := " - Best Practices: " + styles.Regular().Foreground(t.MarkdownLink()).Render("docs/guides/best-practices.md")
+	file4 := " - Key Bindings: " + styles.Regular().Foreground(t.MarkdownLink()).Render("docs/key-bindings.md")
+	file5 := " - AI Chat: " + styles.Regular().Foreground(t.MarkdownLink()).Render("docs/features/ai-chat.md")
+	file6 := " - File Operations: " + styles.Regular().Foreground(t.MarkdownLink()).Render("docs/features/file-operations.md")
+	file7 := " - LSP & Intelligence: " + styles.Regular().Foreground(t.MarkdownLink()).Render("docs/features/lsp-and-intelligence.md")
+	file8 := " - Best Practices: " + styles.Regular().Foreground(t.MarkdownLink()).Render("docs/guides/best-practices.md")
 	footer := styles.Regular().Foreground(t.TextMuted()).Render("Press esc or q to close")
 
 	lines := []string{
@@ -65,6 +69,10 @@ func (d *docsDialogCmp) View() string {
 		file2,
 		file3,
 		file4,
+		file5,
+		file6,
+		file7,
+		file8,
 		"",
 		footer,
 	}

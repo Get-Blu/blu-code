@@ -2,6 +2,8 @@ package page
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -80,6 +82,15 @@ func (p *chatPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Check if the agent is busy before executing custom commands
 		if p.app.CoderAgent.IsBusy() {
 			return p, util.ReportWarn("Agent is busy, please wait before executing a command...")
+		}
+
+		// Handle built-in custom commands
+		if msg.CommandID == "export" {
+			filename := msg.Args["filename"]
+			if filename == "" {
+				filename = "session_export.md"
+			}
+			return p, p.exportSession(filename)
 		}
 		
 		// Process the command content with arguments if any
@@ -195,6 +206,33 @@ func (p *chatPage) sendMessage(text string, attachments []message.Attachment) te
 		return util.ReportError(err)
 	}
 	return tea.Batch(cmds...)
+}
+
+func (p *chatPage) exportSession(filename string) tea.Cmd {
+	if p.session.ID == "" {
+		return util.ReportWarn("No session to export")
+	}
+
+	messages, err := p.app.Messages.List(context.Background(), p.session.ID)
+	if err != nil {
+		return util.ReportError(err)
+	}
+
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("# Session: %s\n\n", p.session.Title))
+	for _, m := range messages {
+		role := strings.ToUpper(string(m.Role))
+		sb.WriteString(fmt.Sprintf("## %s\n\n", role))
+		sb.WriteString(m.Content().Text)
+		sb.WriteString("\n\n---\n\n")
+	}
+
+	err = os.WriteFile(filename, []byte(sb.String()), 0644)
+	if err != nil {
+		return util.ReportError(err)
+	}
+
+	return util.ReportInfo(fmt.Sprintf("Session exported to %s", filename))
 }
 
 func (p *chatPage) SetSize(width, height int) tea.Cmd {

@@ -25,6 +25,8 @@ Blu is optimized for a keyboard-driven workflow. Below is a list of the primary 
 
 - `Up` / `Down`: Scroll through the conversation history.
 - `PageUp` / `PageDown`: Scroll faster through history.
+- `Home` / `g`: Jump to the top of the conversation.
+- `End` / `G`: Jump to the bottom of the conversation.
 
 ## Approval Dialogs
 

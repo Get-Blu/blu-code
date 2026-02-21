@@ -162,8 +162,9 @@ func loadCommandsFromDir(commandsDir string, prefix string) ([]Command, error) {
 
 				// No arguments needed, run command directly
 				return util.CmdHandler(CommandRunCustomMsg{
-					Content: commandContent,
-					Args:    nil, // No arguments
+					CommandID: cmd.ID,
+					Content:   commandContent,
+					Args:      nil, // No arguments
 				})
 			},
 		}
@@ -181,6 +182,7 @@ func loadCommandsFromDir(commandsDir string, prefix string) ([]Command, error) {
 
 // CommandRunCustomMsg is sent when a custom command is executed
 type CommandRunCustomMsg struct {
-	Content string
-	Args    map[string]string // Map of argument names to values
+	CommandID string
+	Content   string
+	Args      map[string]string // Map of argument names to values
 }

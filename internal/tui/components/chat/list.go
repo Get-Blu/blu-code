@@ -44,6 +44,8 @@ type MessageKeys struct {
 	PageUp       key.Binding
 	HalfPageUp   key.Binding
 	HalfPageDown key.Binding
+	GotoTop      key.Binding
+	GotoBottom   key.Binding
 }
 
 var messageKeys = MessageKeys{
@@ -60,8 +62,16 @@ var messageKeys = MessageKeys{
 		key.WithHelp("ctrl+u", "½ page up"),
 	),
 	HalfPageDown: key.NewBinding(
-		key.WithKeys("ctrl+d", "ctrl+d"),
+		key.WithKeys("ctrl+d"),
 		key.WithHelp("ctrl+d", "½ page down"),
+	),
+	GotoTop: key.NewBinding(
+		key.WithKeys("home", "g"),
+		key.WithHelp("home/g", "top"),
+	),
+	GotoBottom: key.NewBinding(
+		key.WithKeys("end", "G"),
+		key.WithHelp("end/G", "bottom"),
 	),
 }
 
@@ -94,6 +104,12 @@ func (m *messagesCmp) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			u, cmd := m.viewport.Update(msg)
 			m.viewport = u
 			cmds = append(cmds, cmd)
+		}
+		if key.Matches(msg, messageKeys.GotoTop) {
+			m.viewport.GotoTop()
+		}
+		if key.Matches(msg, messageKeys.GotoBottom) {
+			m.viewport.GotoBottom()
 		}
 
 	case renderFinishedMsg:

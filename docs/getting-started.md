@@ -41,3 +41,26 @@ curl -fsSL https://raw.githubusercontent.com/Get-Blu/blu-code/main/install | bas
 ## Initial Setup
 
 When you first launch Blu, it will look for a `.blu.json` configuration file in your home directory or the current working directory. If none is found, it will use default settings. It is recommended to create a configuration file to specify your preferred models and settings.
+
+### Interactive Commands
+
+Blu supports slash commands for quick actions:
+- `/help` - Show all commands and keybindings
+- `/new` - Start a fresh conversation session
+- `/sessions` - Open the session switcher
+- `/clear` - Clear the current chat view
+- `/about` - Show version and author info
+
+### Custom Commands
+
+You can create your own commands by adding Markdown files to the `.blu/commands/` directory in your project root. These files will be parsed, and you can use them via `/your-command-name`.
+
+Example `.blu/commands/test.md`:
+```markdown
+---
+description: Run tests for a specific file
+---
+I need you to run tests for $FILENAME and report the results.
+```
+
+When you type `/test`, Blu will prompt you for the `$FILENAME` argument.
