@@ -3,7 +3,7 @@ package version
 import "runtime/debug"
 
 // Build-time parameters set via -ldflags
-var Version = "1.7.5"
+var Version = "1.7.6"
 
 // A user may install blu using `go install github.com/Get-Blu/blu-code@latest`.
 // without -ldflags, in which case the version above is unset. As a workaround
