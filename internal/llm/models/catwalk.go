@@ -14,7 +14,8 @@ import (
 var (
 	catwalkModels     map[ModelID]Model
 	catwalkProviders  map[ModelProvider]bool
-	catwalkOnce       sync.Once
+	catwalkOnce       *sync.Once = &sync.Once{}
+	catwalkMu         sync.RWMutex
 	catwalkErr        error
 	catwalkURL        = "https://catwalk.charm.sh"
 )
@@ -41,18 +42,20 @@ func FetchCatwalkModels() error {
 			return
 		}
 
-		catwalkModels = make(map[ModelID]Model)
-		catwalkProviders = make(map[ModelProvider]bool)
+		slog.Debug("Processing Catwalk providers", "count", len(providers))
+
+		tempModels := make(map[ModelID]Model)
+		tempProviders := make(map[ModelProvider]bool)
 
 		// Convert Catwalk models to our Model type
 		for _, provider := range providers {
 			providerID := ModelProvider(provider.ID)
-			catwalkProviders[providerID] = true
+			tempProviders[providerID] = true
 
 			for _, model := range provider.Models {
 				modelID := ModelID(model.ID)
 				
-				catwalkModels[modelID] = Model{
+				tempModels[modelID] = Model{
 					ID:                  modelID,
 					Name:                model.Name,
 					Provider:            providerID,
@@ -68,6 +71,11 @@ func FetchCatwalkModels() error {
 				}
 			}
 		}
+
+		catwalkMu.Lock()
+		catwalkModels = tempModels
+		catwalkProviders = tempProviders
+		catwalkMu.Unlock()
 
 		slog.Info("Successfully fetched Catwalk models", "providers", len(providers), "models", len(catwalkModels))
 	})
@@ -89,8 +97,22 @@ func GetAllModels() map[ModelID]Model {
 	}
 
 	// Override/add with Catwalk models if available
+	catwalkMu.RLock()
+	defer catwalkMu.RUnlock()
+	
 	if len(catwalkModels) > 0 {
 		for k, v := range catwalkModels {
+			// If model already exists in static models, merge fields that Catwalk doesn't provide
+			if staticModel, exists := allModels[k]; exists {
+				// Keep static settings if they are more specific
+				if staticModel.SupportsAttachments && !v.SupportsAttachments {
+					v.SupportsAttachments = true
+				}
+				if staticModel.DisableTools && !v.DisableTools {
+					v.DisableTools = true
+				}
+				// Keep other static fields if needed
+			}
 			allModels[k] = v
 		}
 	}
@@ -101,18 +123,30 @@ func GetAllModels() map[ModelID]Model {
 // IsCatwalkProvider checks if a provider is from Catwalk
 func IsCatwalkProvider(provider ModelProvider) bool {
 	_ = FetchCatwalkModels() // Ensure models are fetched
+	catwalkMu.RLock()
+	defer catwalkMu.RUnlock()
 	return catwalkProviders[provider]
 }
 
 // GetCatwalkModels returns only the models fetched from Catwalk
 func GetCatwalkModels() map[ModelID]Model {
 	_ = FetchCatwalkModels()
-	return catwalkModels
+	catwalkMu.RLock()
+	defer catwalkMu.RUnlock()
+	
+	// Return a copy to be safe
+	res := make(map[ModelID]Model, len(catwalkModels))
+	for k, v := range catwalkModels {
+		res[k] = v
+	}
+	return res
 }
 
 // RefreshCatwalkModels forces a refresh of Catwalk models
 // This resets the sync.Once so models will be fetched again
 func RefreshCatwalkModels() error {
-	catwalkOnce = sync.Once{}
+	catwalkMu.Lock()
+	catwalkOnce = &sync.Once{}
+	catwalkMu.Unlock()
 	return FetchCatwalkModels()
 }

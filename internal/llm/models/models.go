@@ -23,15 +23,12 @@ type Model struct {
 	DisableTools        bool          `json:"disable_tools"`
 }
 
-// Model IDs
-const ( // GEMINI
+const (
 	// Bedrock
 	BedrockClaude37Sonnet ModelID = "bedrock.claude-3.7-sonnet"
 	BedrockClaude46Opus   ModelID = "bedrock.claude-4.6-opus"
 	BedrockClaude5Sonnet  ModelID = "bedrock.claude-5-sonnet"
-)
 
-const (
 	ProviderBedrock ModelProvider = "bedrock"
 	// ForTests
 	ProviderMock ModelProvider = "__mock"
