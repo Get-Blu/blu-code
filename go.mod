@@ -13,10 +13,10 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.8.1
 	github.com/catppuccin/go v0.3.0
 	github.com/charmbracelet/bubbles v0.21.0
-	github.com/charmbracelet/bubbletea v1.3.5
+	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/glamour v0.9.1
 	github.com/charmbracelet/lipgloss v1.1.0
-	github.com/charmbracelet/x/ansi v0.8.0
+	github.com/charmbracelet/x/ansi v0.10.1
 	github.com/fsnotify/fsnotify v1.8.0
 	github.com/go-logfmt/logfmt v0.6.0
 	github.com/google/uuid v1.6.0
@@ -121,7 +121,7 @@ require (
 	golang.org/x/image v0.26.0 // indirect
 	golang.org/x/net v0.43.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
-	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/term v0.34.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
 	google.golang.org/genai v1.3.0
